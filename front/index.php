@@ -98,7 +98,7 @@
             <p>Hi folks! This is Starling Benchmark - a Starling Framework performance benchmarking application for mobile devices. Currently only Android is supported.</p>
             <p>The application will be of great benefit to the game developers who use Starling Framework!</p>
             <p>Application will send results to the external server after each benchmark.</p>
-            <p><strong>This page is under construction, because we have not enough data now.</strong></p>
+            <p><strong>This page is under construction, because we do not have enough data for now.</strong></p>
             <p><a class="btn btn-primary btn-large" href="http://dl.dropbox.com/u/21347582/StarlingBenchmark.apk">Download Starling Benchmark &raquo;</a></p>
             <!--div id="chart_div" style="width: 100%; height: 500px;"></div-->
           </div>
