@@ -95,11 +95,11 @@
             
           <div class="hero-unit">
             <h1>Under construction!</h1>
-            <p>Hi folks! This is Starling Benchmark - a Starling Framework performance benchmarking application for mobile devices. Currently only Android is supported.</p>
+            <p>Hi folks! This is Starling Benchmark - a Starling Framework performance benchmarking application for mobile devices. <strong>Currently only Android is supported.</strong></p>
             <p>The application will be of great benefit to the game developers who use Starling Framework!</p>
             <p>Application will send results to the external server after each benchmark.</p>
             <p><strong>This page is under construction, because we do not have enough data for now.</strong></p>
-            <p><a class="btn btn-primary btn-large" href="http://dl.dropbox.com/u/21347582/StarlingBenchmark.apk">Download Starling Benchmark &raquo;</a></p>
+            <p><a class="btn btn-primary btn-large" href="https://play.google.com/store/apps/details?id=air.com.dustunited.StarlingBenchmark">Download Starling Benchmark &raquo;</a></p>
             <!--div id="chart_div" style="width: 100%; height: 500px;"></div-->
           </div>
           <div class="row-fluid">
@@ -114,9 +114,7 @@
               <p><a class="btn" href="http://forum.starling-framework.org/topic/starling-benchmark-for-mobile-devices">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="span4">
-              <h2>Download</h2>
-              <p>While our application is not appear on Google Play, you can use a temporary link below. </p>
-              <p><a class="btn" href="http://dl.dropbox.com/u/21347582/StarlingBenchmark.apk">Download &raquo;</a></p>
+              <p><img src="http://qrcode.kaywa.com/img.php?s=5&d=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dair.com.dustunited.StarlingBenchmark"</p>
             </div><!--/span-->
           </div><!--/row-->
         </div><!--/span-->
