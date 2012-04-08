@@ -1,6 +1,7 @@
 package scenes
 {
     import flash.system.Capabilities;
+    import flash.system.System;
     
     import starling.core.Starling;
     import starling.display.Button;
@@ -59,10 +60,21 @@ package scenes
 		{
 		}
         
-        private function onBackButtonTriggered(event:Event):void
-        {
-            mBackButton.removeEventListener(Event.TRIGGERED, onBackButtonTriggered);
-            dispatchEvent(new Event(CLOSING, true));
-        }
+		protected function prepareObject():Object
+		{
+			return {
+				starlingVersion:Starling.VERSION,
+				driver:Starling.context.driverInfo,
+				fps:Starling.current.nativeStage.frameRate.toString(),
+				memory:Number((System.totalMemory * 0.000000954).toFixed(3)).toString(),
+				device:Game.device
+			}	
+		}
+		
+		private function onBackButtonTriggered(event:Event):void
+		{
+			mBackButton.removeEventListener(Event.TRIGGERED, onBackButtonTriggered);
+			dispatchEvent(new Event(CLOSING, true));
+		}
     }
 }

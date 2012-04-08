@@ -10,7 +10,7 @@ package
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
-	import scenes.BenchmarkScene;
+	import scenes.ClassicBenchmarkScene;
 	import scenes.Scene;
 	
 	import starling.core.Starling;
@@ -26,6 +26,9 @@ package
 
     public class Game extends Sprite
     {
+		public static var sender:dataSender;
+		public static var device:Object = new Object();
+		
 		private var mInfoText:TextField;
 		private var mMainMenu:Sprite;
 		private var mCurrentScene:Scene;
@@ -42,26 +45,36 @@ package
 		{
 			removeEventListener( Event.ADDED_TO_STAGE, Init );
 			
+			sender = new dataSender();
+			
 			mMainMenu = new Sprite();
 			addChild(mMainMenu);
 			
-			var naticeRes:String = Capabilities.screenResolutionX+"x"+Capabilities.screenResolutionY;
+			var testRes:String = Constants.GameWidth+"x"+Constants.GameHeight;
+			var nativeRes:String = Capabilities.screenResolutionX+"x"+Capabilities.screenResolutionY;
 			
-			var buttonsToCreate:Array = [
-				["Classic: Images, 320x480, 30fps",           "classicBenchmark1"],
-				["Classic: MovieClips, 320x480, 30fps",       "classicBenchmark2"],
-				["Classic: Images, "+naticeRes+", 30fps",     "classicBenchmark3"],
-				["Classic: MovieClips, "+naticeRes+", 30fps", "classicBenchmark4"],
-				["Classic: Images, 320x480, 60fps",           "classicBenchmark5"],
-				["Classic: MovieClips, 320x480, 60fps",       "classicBenchmark6"],
-				["Classic: Images, "+naticeRes+", 60fps",     "classicBenchmark7"],
-				["Classic: MovieClips, "+naticeRes+", 60fps", "classicBenchmark8"],
-				["Exit", "Exit"],
+			var buttons:Array = [
+				["Classic: Images, "+testRes+", 30fps",       "classicBenchmark1"],
+				["Classic: MovieClips, "+testRes+", 30fps",   "classicBenchmark2"],
+				["Classic: Images, "+testRes+", 60fps",       "classicBenchmark5"],
+				["Classic: MovieClips, "+testRes+", 60fps",   "classicBenchmark6"],
 			];
+			
+			if (testRes != nativeRes) {
+				buttons = buttons.concat([
+					["Classic: Images, "+nativeRes+", 30fps",     "classicBenchmark3"],
+					["Classic: MovieClips, "+nativeRes+", 30fps", "classicBenchmark4"],
+					["Classic: Images, "+nativeRes+", 60fps",     "classicBenchmark7"],
+					["Classic: MovieClips, "+nativeRes+", 60fps", "classicBenchmark8"],
+				]);
+			}
+			
+			buttons.push(["Exit", "Exit"]);
+			
 			
 			var count:int = 0;
 			
-			for each (var buttonToCreate:Array in buttonsToCreate)
+			for each (var buttonToCreate:Array in buttons)
 			{
 				var button:Button = createButton(buttonToCreate[0], buttonToCreate[1], stage.stageWidth >> 1, 100 + int(count++) * 42, "Button");				
 				mMainMenu.addChild(button);
@@ -70,30 +83,50 @@ package
 			addEventListener(Scene.CLOSING, onSceneClosing);
 			
             // show information about rendering method (hardware/software)
-            var Info:String = "Driver: " + Starling.context.driverInfo + 
+            var deviceInfo:String = "Driver: " + Starling.context.driverInfo + 
 				"\nScreen: " + Capabilities.screenResolutionX+"x"+Capabilities.screenResolutionY +
 				" ScreenDPI: " + String(Capabilities.screenDPI);
 			
 			try {
 				NativeDeviceInfo.parse();
-				Info += "\nDevice: " + 
+				
+				device = {
+					manufacturer:NativeDeviceProperties.PRODUCT_MANUFACTURER.value,
+					model:NativeDeviceProperties.PRODUCT_MODEL.value,
+					os:NativeDeviceProperties.OS_NAME.value,
+					osVersion:NativeDeviceProperties.OS_VERSION.value
+				};
+				
+				deviceInfo += "\nDevice: " + 
 					NativeDeviceProperties.PRODUCT_MANUFACTURER.value + ", " + 
 					NativeDeviceProperties.PRODUCT_MODEL.value + ", " + 
 					NativeDeviceProperties.OS_NAME.value + " " + 
 					NativeDeviceProperties.OS_VERSION.value + " ";
-			} catch (e:Error) {}
+			} catch (e:Error) {
+				device = {
+					manufacturer:"",
+					model:"",
+					os:"",
+					osVersion:""
+				};
+			}
 			
 			if (NetworkInfo.isSupported) {
 				var interfaces:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
+				var address:String;
 				for each (var object:NetworkInterface in interfaces) {
-					if (object.hardwareAddress) {
-						Info += "\nMAC: " + object.hardwareAddress;
+					address = object.hardwareAddress;
+					if (address) {
+						device.mac = address;
+						deviceInfo += "\nMAC: " + address;
 						break;
 					}
 				}			
+			} else {
+				device.mac = "";
 			}
 
-			mInfoText = createTF(3, 3, 320, 128, Info, 0xffffff, 14)			
+			mInfoText = createTF(3, 3, 320, 128, deviceInfo, 0xffffff, 14);			
 			mMainMenu.addChild(mInfoText);
         }
 		
@@ -166,84 +199,86 @@ package
 			addChild(mCurrentScene);
 		}
 		
+		// BENCHMARKS
+		
 		private function classicBenchmark1(event:Event):void {
 			var options:Object = {
 				stageWidth:Constants.GameWidth, 
-					stageHeight:Constants.GameHeight, 
-					frameRate:30, 
-					type:"Images"
+				stageHeight:Constants.GameHeight, 
+				frameRate:30, 
+				type:"Images"
 			};
-			showScene(getQualifiedClassName(BenchmarkScene), options);
+			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}
 		
 		private function classicBenchmark2(event:Event):void {
 			var options:Object = {
 				stageWidth:Constants.GameWidth, 
-					stageHeight:Constants.GameHeight, 
-					frameRate:30, 
-					type:"MovieClips"
+				stageHeight:Constants.GameHeight, 
+				frameRate:30, 
+				type:"MovieClips"
 			};
-			showScene(getQualifiedClassName(BenchmarkScene), options);
+			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}
 		
 		private function classicBenchmark3(event:Event):void {
 			var options:Object = {
 				stageWidth:Capabilities.screenResolutionX,
-					stageHeight:Capabilities.screenResolutionY, 
-					frameRate:30, 
-					type:"Images"
+				stageHeight:Capabilities.screenResolutionY, 
+				frameRate:30, 
+				type:"Images"
 			};
-			showScene(getQualifiedClassName(BenchmarkScene), options);
+			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}
 		
 		private function classicBenchmark4(event:Event):void {
 			var options:Object = {
 				stageWidth:Capabilities.screenResolutionX, 
-					stageHeight:Capabilities.screenResolutionY, 
-					frameRate:30, 
-					type:"MovieClips"
+				stageHeight:Capabilities.screenResolutionY, 
+				frameRate:30, 
+				type:"MovieClips"
 			};
-			showScene(getQualifiedClassName(BenchmarkScene), options);
+			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}
 		
 		private function classicBenchmark5(event:Event):void {
 			var options:Object = {
 				stageWidth:Constants.GameWidth, 
-					stageHeight:Constants.GameHeight, 
-					frameRate:60, 
-					type:"Images"
+				stageHeight:Constants.GameHeight, 
+				frameRate:60, 
+				type:"Images"
 			};
-			showScene(getQualifiedClassName(BenchmarkScene), options);
+			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}
 		
 		private function classicBenchmark6(event:Event):void {
 			var options:Object = {
 				stageWidth:Constants.GameWidth,
-					stageHeight:Constants.GameHeight,
-					frameRate:60,
-					type:"MovieClips"
+				stageHeight:Constants.GameHeight,
+				frameRate:60,
+				type:"MovieClips"
 			};
-			showScene(getQualifiedClassName(BenchmarkScene), options);
+			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}
 		
 		private function classicBenchmark7(event:Event):void {
 			var options:Object = {
 				stageWidth:Capabilities.screenResolutionX, 
-					stageHeight:Capabilities.screenResolutionY, 
-					frameRate:60, 
-					type:"Images"
+				stageHeight:Capabilities.screenResolutionY, 
+				frameRate:60, 
+				type:"Images"
 			};
-			showScene(getQualifiedClassName(BenchmarkScene), options);
+			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}
 		
 		private function classicBenchmark8(event:Event):void {
 			var options:Object = {
 				stageWidth:Capabilities.screenResolutionX, 
-					stageHeight:Capabilities.screenResolutionY, 
-					frameRate:60, 
-					type:"MovieClips"
+				stageHeight:Capabilities.screenResolutionY, 
+				frameRate:60, 
+				type:"MovieClips"
 			};
-			showScene(getQualifiedClassName(BenchmarkScene), options);
+			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}		
 	}
 }

@@ -1,1 +1,7 @@
-Hi folks! This is Starling Benchmark - application for testing performance of Starling Framework on different mobile devices.
+Hi folks! This is Starling Benchmark - a Starling Framework performance benchmarking application for mobile devices.
+
+The application will be of great benefit to the game developers who use Starling Framework!
+
+Application will send results to the external server after each benchmark.
+
+All statistics are open. You can get it here: <a href="http://makegames.ru/starling/benchmark/">http://makegames.ru/starling/benchmark/</a>
