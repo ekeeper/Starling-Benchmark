@@ -19,14 +19,25 @@ if ($data) {
             $device[$key] = (is_array($value)) ? "" : trim($value);
         }
 
-        $sql ="SELECT id FROM `devices` WHERE `mac` = '{$device["mac"]}' AND `model`='{$device["model"]}' LIMIT 1";
+        $fieldsKeys = array('mac', 'manufacturer', 'model', 'os', 'osVersion');
+        $fieldsValues = array();
+        foreach ($fieldsKeys as $value) {
+            $fieldsValues[] = "`{$value}` = '{$device[$value]}'";
+        }
+        $fieldsValues = join(" AND ", $fieldsValues);
+        
+        $sql ="SELECT id FROM `devices` WHERE {$fieldsValues} LIMIT 1";
         $result = $db->query($sql);
         
         if ($result) {
             if (mysql_num_rows($result) > 0) {
                 $row = mysql_fetch_assoc($result);
                 $deviceId = STR_FROM_DB($row['id']);
+                $sql = "UPDATE `devices` SET `screenWidth` = '{$device['screenWidth']}', `screenHeight` = '{$device['screenHeight']}' WHERE `id` = {$deviceId};";
+                $db->query($sql);
             } else {
+                $device["manufacturer"] = ucfirst($device["manufacturer"]);
+                
                 $keys = join("`, `", array_keys($device));
                 $values = join("', '", array_values($device));
                 $sql = "INSERT INTO `devices` (`id`, `{$keys}`) VALUES (NULL, '{$values}');";

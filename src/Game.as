@@ -126,6 +126,9 @@ package
 				device.mac = "";
 			}
 
+			device.screenWidth = Capabilities.screenResolutionX.toString();
+			device.screenHeight = Capabilities.screenResolutionY.toString();
+			
 			mInfoText = createTF(3, 3, 320, 128, deviceInfo, 0xffffff, 14);			
 			mMainMenu.addChild(mInfoText);
         }
