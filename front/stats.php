@@ -33,7 +33,13 @@ if ($data) {
             if (mysql_num_rows($result) > 0) {
                 $row = mysql_fetch_assoc($result);
                 $deviceId = STR_FROM_DB($row['id']);
-                $sql = "UPDATE `devices` SET `screenWidth` = '{$device['screenWidth']}', `screenHeight` = '{$device['screenHeight']}' WHERE `id` = {$deviceId};";
+                
+                if (!in_array("", array($device['screenWidth'], $device['screenHeight']))) {
+                    $sql = "UPDATE `devices` SET `screenWidth` = '{$device['screenWidth']}', `screenHeight` = '{$device['screenHeight']}' WHERE `id` = {$deviceId};";
+                    $db->query($sql);
+                }
+                
+                $sql = "UPDATE `devices` SET `dpi` = '{$device['dpi']}' WHERE `id` = {$deviceId};";
                 $db->query($sql);
             } else {
                 $device["manufacturer"] = ucfirst($device["manufacturer"]);

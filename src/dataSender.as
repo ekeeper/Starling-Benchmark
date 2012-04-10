@@ -53,8 +53,8 @@
         }
 
         private function completeHandler(event:Event):void {
-            //var loader:URLLoader = URLLoader(event.target);
-            //trace("completeHandler: " + loader.data);
+            var loader:URLLoader = URLLoader(event.target);
+            trace("completeHandler: " + loader.data);
 			//dispatchEvent(new Event("DATALOADED"));
 			//trace("data loaded\n\n");
         }
@@ -68,8 +68,8 @@
         }
 
         private function securityErrorHandler(event:SecurityErrorEvent):void {
-			//var loader:URLLoader = URLLoader(event.target);
-			//trace("securityErrorHandler: " + loader.data);
+			var loader:URLLoader = URLLoader(event.target);
+			trace("securityErrorHandler: " + loader.data);
 			//dispatchEvent(new Event("DATALOADED"));
 			//trace("data loaded\n\n");
         }
@@ -79,8 +79,8 @@
         }
 
         private function ioErrorHandler(event:IOErrorEvent):void {
-			//var loader:URLLoader = URLLoader(event.target);
-			//trace("ioErrorHandler: " + loader.data);
+			var loader:URLLoader = URLLoader(event.target);
+			trace("ioErrorHandler: " + loader.data);
 			//dispatchEvent(new Event("DATALOADED"));
 			//trace("data loaded\n\n");
         }

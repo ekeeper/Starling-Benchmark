@@ -5,10 +5,10 @@ $q = $_REQUEST['q'];
 $d = $_REQUEST['d'];
 
 if ($d) {
-    $sql = "SELECT `manufacturer` , `model` , `os` , `osVersion` , `screenWidth` , `screenHeight` \n"
+    $sql = "SELECT count(`id`) as `cnt`, `manufacturer` , `model` , `screenWidth` , `screenHeight` \n"
     . "FROM `devices` \n"
     . "WHERE 1 \n"
-    . "GROUP BY `manufacturer` , `model` , `os` , `osVersion` , `screenWidth` , `screenHeight` \n"
+    . "GROUP BY `manufacturer` , `model`, `screenWidth` , `screenHeight` \n"
     . "ORDER BY `manufacturer` , `model`;";
     
     $result = $db->query($sql);
@@ -163,8 +163,6 @@ if ($q) {
               <li><a href="/starling/benchmark?q=Classic_MovieClips_60_time">Classic: MovieClips, 60fps, time</a></li>
               <li class="nav-header">Devices</li>
               <li><a href="/starling/benchmark?d=all">All benchmarked devices</a></li>
-              <!--li><a href="/starling/benchmark?d=resolution">Devices by resolution</a></li>
-              <li><a href="/starling/benchmark?d=os">Devices by OS</a></li-->
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
@@ -174,8 +172,8 @@ if ($q) {
         <table class="table table-bordered table-striped">
             <tr>
                 <th>Model</th>
-                <th>OS</th>
                 <th>Resolution</th>
+                <th>Number</th>
             </tr>
             <? 
                 foreach ($devices as $device) { 
@@ -183,8 +181,8 @@ if ($q) {
             ?>
             <tr>
                 <td><a target="_blank" href="http://www.google.ru/search?q=<?=urlencode($model)?>"><?=$model?></a></td>
-                <td><?="{$device['os']} {$device['osVersion']}"?></td>
                 <td><?="{$device['screenWidth']}x{$device['screenHeight']}"?></td>
+                <td><?=$device['cnt']?></td>
             </tr>
             <? } ?>
         </table>

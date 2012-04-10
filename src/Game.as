@@ -1,11 +1,6 @@
 package 
 {
-	import com.android.deviceinfo.NativeDeviceInfo;
-	import com.android.deviceinfo.NativeDeviceProperties;
-	
 	import flash.desktop.NativeApplication;
-	import flash.net.NetworkInfo;
-	import flash.net.NetworkInterface;
 	import flash.system.Capabilities;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
@@ -35,8 +30,8 @@ package
 		
         public function Game()
         {
-			Starling.current.stage.stageWidth  = Constants.GameWidth;
-			Starling.current.stage.stageHeight = Constants.GameHeight;
+//			Starling.current.stage.stageWidth  = Number(Constants.Device.screenWidth);
+//			Starling.current.stage.stageHeight = Number(Constants.Device.screenHeight);
 			
 			addEventListener(Event.ADDED_TO_STAGE, Init);
 		}
@@ -50,86 +45,49 @@ package
 			mMainMenu = new Sprite();
 			addChild(mMainMenu);
 			
-			var testRes:String = Constants.GameWidth+"x"+Constants.GameHeight;
-			var nativeRes:String = Capabilities.screenResolutionX+"x"+Capabilities.screenResolutionY;
+			var nativeRes:String = Constants.Device.screenWidth+"x"+Constants.Device.screenHeight;
 			
 			var buttons:Array = [
-				["Classic: Images, "+testRes+", 30fps",       "classicBenchmark1"],
-				["Classic: MovieClips, "+testRes+", 30fps",   "classicBenchmark2"],
-				["Classic: Images, "+testRes+", 60fps",       "classicBenchmark5"],
-				["Classic: MovieClips, "+testRes+", 60fps",   "classicBenchmark6"],
+				["Classic: Images, "+nativeRes+", 30fps",     "classicBenchmark1"],
+				["Classic: MovieClips, "+nativeRes+", 30fps", "classicBenchmark2"],
+				["Classic: Images, "+nativeRes+", 60fps",     "classicBenchmark3"],
+				["Classic: MovieClips, "+nativeRes+", 60fps", "classicBenchmark4"],
+				["Exit", "Exit"]
 			];
 			
-			if (testRes != nativeRes) {
-				buttons = buttons.concat([
-					["Classic: Images, "+nativeRes+", 30fps",     "classicBenchmark3"],
-					["Classic: MovieClips, "+nativeRes+", 30fps", "classicBenchmark4"],
-					["Classic: Images, "+nativeRes+", 60fps",     "classicBenchmark7"],
-					["Classic: MovieClips, "+nativeRes+", 60fps", "classicBenchmark8"],
-				]);
-			}
-			
-			buttons.push(["Exit", "Exit"]);
-			
-			
 			var count:int = 0;
+			var button:Button;
+			var buttonsContainer:Sprite = new Sprite();
 			
 			for each (var buttonToCreate:Array in buttons)
 			{
-				var button:Button = createButton(buttonToCreate[0], buttonToCreate[1], stage.stageWidth >> 1, 100 + int(count++) * 42, "Button");				
-				mMainMenu.addChild(button);
-			}			
+				button = createButton(buttonToCreate[0], buttonToCreate[1], 0, 42 * count++, "Button");				
+				buttonsContainer.addChild(button);
+
+				button.x += button.pivotX;
+				button.y += button.pivotY;				
+			}
+			
+			mMainMenu.addChild(buttonsContainer);
+			buttonsContainer.pivotX = buttonsContainer.width >> 1;
+			buttonsContainer.pivotY = buttonsContainer.height >> 1;
+			buttonsContainer.x = Constants.CenterX;
+			buttonsContainer.y = Constants.CenterY;
 			
 			addEventListener(Scene.CLOSING, onSceneClosing);
 			
             // show information about rendering method (hardware/software)
             var deviceInfo:String = "Driver: " + Starling.context.driverInfo + 
-				"\nScreen: " + Capabilities.screenResolutionX+"x"+Capabilities.screenResolutionY +
-				" ScreenDPI: " + String(Capabilities.screenDPI);
-			
-			try {
-				NativeDeviceInfo.parse();
-				
-				device = {
-					manufacturer:NativeDeviceProperties.PRODUCT_MANUFACTURER.value,
-					model:NativeDeviceProperties.PRODUCT_MODEL.value,
-					os:NativeDeviceProperties.OS_NAME.value,
-					osVersion:NativeDeviceProperties.OS_VERSION.value
-				};
-				
-				deviceInfo += "\nDevice: " + 
-					NativeDeviceProperties.PRODUCT_MANUFACTURER.value + ", " + 
-					NativeDeviceProperties.PRODUCT_MODEL.value + ", " + 
-					NativeDeviceProperties.OS_NAME.value + " " + 
-					NativeDeviceProperties.OS_VERSION.value + " ";
-			} catch (e:Error) {
-				device = {
-					manufacturer:"",
-					model:"",
-					os:"",
-					osVersion:""
-				};
-			}
-			
-			if (NetworkInfo.isSupported) {
-				var interfaces:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
-				var address:String;
-				for each (var object:NetworkInterface in interfaces) {
-					address = object.hardwareAddress;
-					if (address) {
-						device.mac = address;
-						deviceInfo += "\nMAC: " + address;
-						break;
-					}
-				}			
-			} else {
-				device.mac = "";
-			}
+				"\nScreen: " + Constants.Device.screenWidth+"x"+Constants.Device.screenHeight +
+				" ScreenDPI: " + Constants.Device.dpi +
+				"\nDevice: " +
+					Constants.Device.manufacturer + ", " +
+					Constants.Device.model + ", " +
+					Constants.Device.os + ", " +
+					Constants.Device.osVersion + ", " +
+				"\nMAC: " + Constants.Device.mac;
 
-			device.screenWidth = Capabilities.screenResolutionX.toString();
-			device.screenHeight = Capabilities.screenResolutionY.toString();
-			
-			mInfoText = createTF(3, 3, 320, 128, deviceInfo, 0xffffff, 14);			
+			mInfoText = createTF(3, 3, Constants.Device.screenWidth, 128, deviceInfo, 0xffffff, 16);			
 			mMainMenu.addChild(mInfoText);
         }
 		
@@ -141,7 +99,7 @@ package
 			if (title != "") {
 				button.text = title;
 				button.fontName = "Ubuntu";
-				button.fontSize = 14;
+				button.fontSize = 16;
 			}
 			
 			button.pivotX = button.width >> 1;
@@ -184,8 +142,6 @@ package
 			mCurrentScene = null;
 			
 			Starling.current.stop();
-			Starling.current.stage.stageWidth  = Constants.GameWidth;
-			Starling.current.stage.stageHeight = Constants.GameHeight;
 			Starling.current.nativeStage.frameRate = Constants.FPS;
 			Starling.current.start();
 			
@@ -206,8 +162,6 @@ package
 		
 		private function classicBenchmark1(event:Event):void {
 			var options:Object = {
-				stageWidth:Constants.GameWidth, 
-				stageHeight:Constants.GameHeight, 
 				frameRate:30, 
 				type:"Images"
 			};
@@ -216,8 +170,6 @@ package
 		
 		private function classicBenchmark2(event:Event):void {
 			var options:Object = {
-				stageWidth:Constants.GameWidth, 
-				stageHeight:Constants.GameHeight, 
 				frameRate:30, 
 				type:"MovieClips"
 			};
@@ -226,9 +178,7 @@ package
 		
 		private function classicBenchmark3(event:Event):void {
 			var options:Object = {
-				stageWidth:Capabilities.screenResolutionX,
-				stageHeight:Capabilities.screenResolutionY, 
-				frameRate:30, 
+				frameRate:60, 
 				type:"Images"
 			};
 			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
@@ -236,48 +186,6 @@ package
 		
 		private function classicBenchmark4(event:Event):void {
 			var options:Object = {
-				stageWidth:Capabilities.screenResolutionX, 
-				stageHeight:Capabilities.screenResolutionY, 
-				frameRate:30, 
-				type:"MovieClips"
-			};
-			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
-		}
-		
-		private function classicBenchmark5(event:Event):void {
-			var options:Object = {
-				stageWidth:Constants.GameWidth, 
-				stageHeight:Constants.GameHeight, 
-				frameRate:60, 
-				type:"Images"
-			};
-			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
-		}
-		
-		private function classicBenchmark6(event:Event):void {
-			var options:Object = {
-				stageWidth:Constants.GameWidth,
-				stageHeight:Constants.GameHeight,
-				frameRate:60,
-				type:"MovieClips"
-			};
-			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
-		}
-		
-		private function classicBenchmark7(event:Event):void {
-			var options:Object = {
-				stageWidth:Capabilities.screenResolutionX, 
-				stageHeight:Capabilities.screenResolutionY, 
-				frameRate:60, 
-				type:"Images"
-			};
-			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
-		}
-		
-		private function classicBenchmark8(event:Event):void {
-			var options:Object = {
-				stageWidth:Capabilities.screenResolutionX, 
-				stageHeight:Capabilities.screenResolutionY, 
 				frameRate:60, 
 				type:"MovieClips"
 			};

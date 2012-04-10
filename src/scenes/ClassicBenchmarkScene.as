@@ -165,8 +165,8 @@ package scenes
 			
 			resultObject.benchmarkName = NAME;
 			resultObject.benchmarkVersion = VERSION;
-			resultObject.screenWidth = mScreenWidth.toString();
-			resultObject.screenHeight = mScreenHeight.toString();
+			resultObject.screenWidth = mScreenWidth.toString(),
+			resultObject.screenHeight = mScreenHeight.toString(),
 			resultObject.time = time.toString();
 			resultObject.type = mOptions.type;
 			resultObject.objects = mContainer.numChildren.toString();

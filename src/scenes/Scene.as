@@ -25,12 +25,10 @@ package scenes
         {
 			mOptions = options;
 
-			mScreenWidth = options.stageWidth; 
-			mScreenHeight = options.stageHeight;
+			mScreenWidth = Number(Constants.Device.screenWidth); 
+			mScreenHeight = Number(Constants.Device.screenHeight);
 			
 			Starling.current.stop();
-			Starling.current.stage.stageWidth  = mScreenWidth;
-			Starling.current.stage.stageHeight = mScreenHeight;
 			Starling.current.nativeStage.frameRate = options.frameRate;
 			Starling.current.start();
 			
@@ -43,7 +41,7 @@ package scenes
 			mStartButton = new Button(Assets.getTexture("ButtonBig"), "Restart");
 			mStartButton.fontSize = 32;
 			mStartButton.addEventListener(Event.TRIGGERED, startBenchmark);
-			mStartButton.x = (options.stageWidth - mStartButton.width) >> 1;
+			mStartButton.x = (mScreenWidth - mStartButton.width) >> 1;
 			mStartButton.y = 20;
 			mStartButton.visible = false;
 			addChild(mStartButton);			
@@ -67,7 +65,7 @@ package scenes
 				driver:Starling.context.driverInfo,
 				fps:Starling.current.nativeStage.frameRate.toString(),
 				memory:Number((System.totalMemory * 0.000000954).toFixed(3)).toString(),
-				device:Game.device
+				device:Constants.Device
 			}	
 		}
 		
