@@ -22,6 +22,7 @@ package
     public class Game extends Sprite
     {
 		public static var sender:dataSender;
+		public static var queue:Vector.<Function> = new Vector.<Function>();
 		public static var device:Object = new Object();
 		
 		private var mInfoText:TextField;

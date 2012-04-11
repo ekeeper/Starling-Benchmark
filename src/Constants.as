@@ -23,29 +23,29 @@ package
 			var devStr:String = Capabilities.os;
 			var devStrArr:Array = devStr.split(" ");
 			devStr = devStrArr.pop();
-			devStr = (devStr.indexOf(",") > -1)?devStr.split(",").shift():"";
+			devStr = (devStr.indexOf(",") > -1)?devStr.split(",").shift():devStr;
 			
 			device.manufacturer = "Apple";
 			device.model = devStr;
-			device.os = Capabilities.os;
-			device.osVersion = ""; // TODO: parce devStr			
+			device.os = "iOS";
+			device.osVersion = devStrArr.pop();			
 			
-			if ((devStr == "iPhone1") || (devStr == "iPhone2")){
+			if ((devStr == "iPhone1") || (devStr == "iPhone2") || (devStr == "iPod3")){
 				// lowdef iphone, 3, 3g, 3gs
-				device.screenWidth = 480;
-				device.screenHeight = 320;
-			} else if ((devStr == "iPhone3") || (devStr == "iPhone4")){
+				device.screenWidth = 320;
+				device.screenHeight = 480;
+			} else if ((devStr == "iPhone3") || (devStr == "iPhone4") || (devStr == "iPod4")){
 				// highdef iphone 4, 4s
-				device.screenWidth = 960;
-				device.screenHeight = 640;
+				device.screenWidth = 640;
+				device.screenHeight = 960;
 			} else if ((devStr == "iPad1") || (devStr == "iPad2")){
 				// ipad 1,2
-				device.screenWidth = 1024;
-				device.screenHeight = 768;
+				device.screenWidth = 768;
+				device.screenHeight = 1024;
 			} else if ((devStr == "iPad3")){
 				// new iPad
-				device.screenWidth = 2048;
-				device.screenHeight = 1536;
+				device.screenWidth = 1536;
+				device.screenHeight = 2048;
 			} else {
 				device.screenWidth = Capabilities.screenResolutionX;
 				device.screenHeight = Capabilities.screenResolutionY;
@@ -60,7 +60,7 @@ package
 				} catch (e:Error) {
 					device.manufacturer = "";
 					device.model = "";
-					device.os = "";
+					device.os = Capabilities.os;
 					device.osVersion = "";
 				}
 				
