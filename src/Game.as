@@ -31,8 +31,8 @@ package
 		
         public function Game()
         {
-//			Starling.current.stage.stageWidth  = Number(Constants.Device.screenWidth);
-//			Starling.current.stage.stageHeight = Number(Constants.Device.screenHeight);
+			Starling.current.stage.stageWidth  = Number(Constants.Device.screenWidth);
+			Starling.current.stage.stageHeight = Number(Constants.Device.screenHeight);
 			
 			addEventListener(Event.ADDED_TO_STAGE, Init);
 		}

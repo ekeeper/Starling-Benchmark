@@ -154,13 +154,9 @@ if ($q) {
             <ul class="nav nav-list">
               <li class="nav-header">Reports</li>
               <li><a href="/starling/benchmark?q=Classic_Images_30_objects">Classic: Images, 30fps, objects</a></li>
-              <li><a href="/starling/benchmark?q=Classic_Images_30_time">Classic: Images, 30fps, time</a></li>
               <li><a href="/starling/benchmark?q=Classic_Images_60_objects">Classic: Images, 60fps, objects</a></li>
-              <li><a href="/starling/benchmark?q=Classic_Images_60_time">Classic: Images, 60fps, time</a></li>
               <li><a href="/starling/benchmark?q=Classic_MovieClips_30_objects">Classic: MovieClips, 30fps, objects</a></li>
-              <li><a href="/starling/benchmark?q=Classic_MovieClips_30_time">Classic: MovieClips, 30fps, time</a></li>
               <li><a href="/starling/benchmark?q=Classic_MovieClips_60_objects">Classic: MovieClips, 60fps, objects</a></li>
-              <li><a href="/starling/benchmark?q=Classic_MovieClips_60_time">Classic: MovieClips, 60fps, time</a></li>
               <li class="nav-header">Devices</li>
               <li><a href="/starling/benchmark?d=all">All benchmarked devices</a></li>
             </ul>

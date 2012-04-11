@@ -8,9 +8,11 @@ package
 	import flash.system.Capabilities;
 	
 	import starling.core.Starling;
-
-    public class Constants
-    {
+	
+	public class Constants
+	{
+		public static const isLandscape:Boolean = false;
+		
 		public static const Device:Object = getDeviceDetails();
 		
 		public static const CenterX:int = Number(Device.screenWidth) >> 1;
@@ -52,7 +54,7 @@ package
 				
 				try {
 					NativeDeviceInfo.parse();
-
+					
 					device.manufacturer = NativeDeviceProperties.PRODUCT_MANUFACTURER.value;
 					device.model = NativeDeviceProperties.PRODUCT_MODEL.value;
 					device.os = NativeDeviceProperties.OS_NAME.value;
@@ -64,6 +66,12 @@ package
 					device.osVersion = "";
 				}
 				
+			}
+			
+			if (isLandscape && device.manufacturer == "Apple") {
+				var swap:Number = device.screenWidth; 
+				device.screenWidth = device.screenHeight;
+				device.screenHeight = swap;
 			}
 			
 			device.dpi = String(Capabilities.screenDPI);
