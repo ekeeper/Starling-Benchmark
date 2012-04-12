@@ -18,8 +18,6 @@ package
 	[SWF(width="320", height="480", frameRate="60", backgroundColor="#000000")]
 	public class Startup extends Sprite
 	{
-		public static var nativeStage:Stage = null;
-		
 		private var mStarling:Starling;
 		
 		public function Startup()
@@ -34,8 +32,6 @@ package
 		{
 			removeEventListener( Event.ADDED_TO_STAGE, Init );
 			
-			nativeStage = stage;
-			
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
 			
@@ -46,8 +42,8 @@ package
 			var startupBitmap:Bitmap = new Assets.Startup();
 			addChild(startupBitmap);
 
-			startupBitmap.x = (Capabilities.screenResolutionX - startupBitmap.width) >> 1;
-			startupBitmap.y = (Capabilities.screenResolutionY - startupBitmap.height) >> 1;
+			startupBitmap.x = (Number(Constants.Device.screenWidth) - startupBitmap.width) >> 1;
+			startupBitmap.y = (Number(Constants.Device.screenHeight) - startupBitmap.height) >> 1;
 			
 			Starling.multitouchEnabled = false;  // useful on mobile devices
 			Starling.handleLostContext = true; // deactivate on mobile devices (to save memory)
@@ -61,6 +57,10 @@ package
 			{
 				// Starling is ready! We remove the startup image and start the game.
 				removeChild(startupBitmap);
+
+				Starling.current.stage.stageWidth  = Number(Constants.Device.screenWidth);
+				Starling.current.stage.stageHeight = Number(Constants.Device.screenHeight);
+				
 				mStarling.start();
 			});
 			

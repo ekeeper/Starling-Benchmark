@@ -1,6 +1,9 @@
 package 
 {
 	import flash.desktop.NativeApplication;
+	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.system.Capabilities;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
@@ -32,9 +35,6 @@ package
 		
         public function Game()
         {
-			Starling.current.stage.stageWidth  = Number(Constants.Device.screenWidth);
-			Starling.current.stage.stageHeight = Number(Constants.Device.screenHeight);
-			
 			addEventListener(Event.ADDED_TO_STAGE, Init);
 		}
 		
@@ -51,8 +51,11 @@ package
 			
 			var buttons:Array = [
 				["Classic benchmarks", "parceClassicQueue"],
-				["Exit", "Exit"]
 			];
+			
+			if (Constants.Device.manufacturer != "Apple") {
+				buttons = buttons.concat([["Exit", "Exit"]]);
+			}
 			
 			var count:int = 0;
 			var button:Button;
@@ -76,17 +79,20 @@ package
 			addEventListener(Scene.CLOSING, onSceneClosing);
 			
             // show information about rendering method (hardware/software)
-            var deviceInfo:String = "Driver: " + Starling.context.driverInfo + 
-				"\nScreen: " + Constants.Device.screenWidth+"x"+Constants.Device.screenHeight +
-				" ScreenDPI: " + Constants.Device.dpi +
-				"\nDevice: " +
+            var deviceInfo:String = 
+				"Device: " +
 					Constants.Device.manufacturer + ", " +
 					Constants.Device.model + ", " +
 					Constants.Device.os + " " +
 					Constants.Device.osVersion +
+				"\nCPU: " + Constants.Device.cpuHz + 
+				", RAM: " + Constants.Device.ram +
+				"\nDriver: " + Starling.context.driverInfo + 
+				"\nScreen: " + Constants.Device.screenWidth+"x"+Constants.Device.screenHeight +
+				", ScreenDPI: " + Constants.Device.dpi +
 				"\nMAC: " + Constants.Device.mac;
-
-			mInfoText = createTF(3, 3, Constants.Device.screenWidth, 128, deviceInfo, 0xffffff, 20);			
+			
+			mInfoText = createTF(3, 3, Constants.Device.screenWidth, Constants.Device.screenHeight, deviceInfo, 0xffffff, 20);			
 			mMainMenu.addChild(mInfoText);
         }
 		

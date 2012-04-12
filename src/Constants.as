@@ -30,24 +30,31 @@ package
 			device.manufacturer = "Apple";
 			device.model = devStr;
 			device.os = "iOS";
-			device.osVersion = devStrArr.pop();			
+			device.osVersion = devStrArr.pop();
+			device.cpu = "ARM v7";
+			device.cpuHz = "1GHz";
 			
-			if ((devStr == "iPhone1") || (devStr == "iPhone2") || (devStr == "iPod3")){
+			if ((devStr == "iPhone1") || (devStr == "iPhone2") || (devStr == "iPhone3") || (devStr == "iPod3")){
 				// lowdef iphone, 3, 3g, 3gs
 				device.screenWidth = 320;
 				device.screenHeight = 480;
-			} else if ((devStr == "iPhone3") || (devStr == "iPhone4") || (devStr == "iPod4")){
+				device.cpuHz = "833MHz";
+				device.ram = "256MB";
+			} else if ((devStr == "iPhone4") || (devStr == "iPod4")){
 				// highdef iphone 4, 4s
 				device.screenWidth = 640;
 				device.screenHeight = 960;
+				device.ram = (devStr == "iPod4") ? "256MB" : "512MB";
 			} else if ((devStr == "iPad1") || (devStr == "iPad2")){
 				// ipad 1,2
 				device.screenWidth = 768;
 				device.screenHeight = 1024;
+				device.ram = (devStr == "iPad1") ? "256MB" : "512MB";
 			} else if ((devStr == "iPad3")){
 				// new iPad
 				device.screenWidth = 1536;
 				device.screenHeight = 2048;
+				device.ram = "1GB";
 			} else {
 				device.screenWidth = Capabilities.screenResolutionX;
 				device.screenHeight = Capabilities.screenResolutionY;
@@ -59,11 +66,17 @@ package
 					device.model = NativeDeviceProperties.PRODUCT_MODEL.value;
 					device.os = NativeDeviceProperties.OS_NAME.value;
 					device.osVersion = NativeDeviceProperties.OS_VERSION.value;
+					device.cpu = NativeDeviceProperties.PRODUCT_CPU.value;
+					device.cpuHz = NativeDeviceProperties.PRODUCT_CPU_HZ.value;
+					device.ram = NativeDeviceProperties.PRODUCT_RAM.value;					
 				} catch (e:Error) {
 					device.manufacturer = "";
 					device.model = "";
 					device.os = Capabilities.os;
 					device.osVersion = "";
+					device.cpu = "";
+					device.cpuHz = "";
+					device.ram = "";
 				}
 				
 			}
