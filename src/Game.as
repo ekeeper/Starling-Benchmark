@@ -22,8 +22,9 @@ package
     public class Game extends Sprite
     {
 		public static var sender:dataSender;
-		public static var queue:Vector.<Function> = new Vector.<Function>();
-		public static var device:Object = new Object();
+		public static var currentQueue:Queue;
+		
+		private var mClassicQueue:Queue = new Queue(new <Function>[classicBenchmark1, classicBenchmark2, classicBenchmark3, classicBenchmark4]);
 		
 		private var mInfoText:TextField;
 		private var mMainMenu:Sprite;
@@ -49,10 +50,7 @@ package
 			var nativeRes:String = Constants.Device.screenWidth+"x"+Constants.Device.screenHeight;
 			
 			var buttons:Array = [
-				["Classic: Images, "+nativeRes+", 30fps",     "classicBenchmark1"],
-				["Classic: MovieClips, "+nativeRes+", 30fps", "classicBenchmark2"],
-				["Classic: Images, "+nativeRes+", 60fps",     "classicBenchmark3"],
-				["Classic: MovieClips, "+nativeRes+", 60fps", "classicBenchmark4"],
+				["Classic benchmarks", "parceClassicQueue"],
 				["Exit", "Exit"]
 			];
 			
@@ -62,7 +60,7 @@ package
 			
 			for each (var buttonToCreate:Array in buttons)
 			{
-				button = createButton(buttonToCreate[0], buttonToCreate[1], 0, 42 * count++, "Button");				
+				button = createButton(buttonToCreate[0], buttonToCreate[1], 0, 102 * count++, "ButtonBig");				
 				buttonsContainer.addChild(button);
 
 				button.x += button.pivotX;
@@ -84,11 +82,11 @@ package
 				"\nDevice: " +
 					Constants.Device.manufacturer + ", " +
 					Constants.Device.model + ", " +
-					Constants.Device.os + ", " +
-					Constants.Device.osVersion + ", " +
+					Constants.Device.os + " " +
+					Constants.Device.osVersion +
 				"\nMAC: " + Constants.Device.mac;
 
-			mInfoText = createTF(3, 3, Constants.Device.screenWidth, 128, deviceInfo, 0xffffff, 16);			
+			mInfoText = createTF(3, 3, Constants.Device.screenWidth, 128, deviceInfo, 0xffffff, 20);			
 			mMainMenu.addChild(mInfoText);
         }
 		
@@ -100,7 +98,7 @@ package
 			if (title != "") {
 				button.text = title;
 				button.fontName = "Ubuntu";
-				button.fontSize = 16;
+				button.fontSize = 24;
 			}
 			
 			button.pivotX = button.width >> 1;
@@ -142,6 +140,11 @@ package
 			mCurrentScene.removeFromParent(true);
 			mCurrentScene = null;
 			
+			if (currentQueue && !currentQueue.finished) {
+				currentQueue.nextCommand(event);
+				return;
+			}
+			
 			Starling.current.stop();
 			Starling.current.nativeStage.frameRate = Constants.FPS;
 			Starling.current.start();
@@ -161,8 +164,15 @@ package
 		
 		// BENCHMARKS
 		
+		private function parceClassicQueue(event:Event):void {
+			currentQueue = mClassicQueue;
+			currentQueue.reset()
+			currentQueue.nextCommand(event);
+		}
+		
 		private function classicBenchmark1(event:Event):void {
 			var options:Object = {
+				queued:true,
 				frameRate:30, 
 				type:"Images"
 			};
@@ -171,6 +181,7 @@ package
 		
 		private function classicBenchmark2(event:Event):void {
 			var options:Object = {
+				queued:true,
 				frameRate:30, 
 				type:"MovieClips"
 			};
@@ -179,6 +190,7 @@ package
 		
 		private function classicBenchmark3(event:Event):void {
 			var options:Object = {
+				queued:true,
 				frameRate:60, 
 				type:"Images"
 			};
@@ -187,6 +199,7 @@ package
 		
 		private function classicBenchmark4(event:Event):void {
 			var options:Object = {
+				queued:true,
 				frameRate:60, 
 				type:"MovieClips"
 			};

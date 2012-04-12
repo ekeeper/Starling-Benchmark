@@ -56,6 +56,10 @@ package scenes
 		
 		protected function startBenchmark(event:Event = null):void
 		{
+			if (mOptions.queued) {
+				mBackButton.text = "Please wait";
+				mBackButton.enabled = false;
+			}	
 		}
         
 		protected function prepareObject():Object

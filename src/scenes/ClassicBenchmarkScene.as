@@ -108,6 +108,8 @@ package scenes
         
 		override protected function startBenchmark(event:Event = null):void
         {
+			super.startBenchmark();
+			
             System.gc();
 			
 			mStartButton.visible = false;
@@ -173,8 +175,13 @@ package scenes
 				
 			Game.sender.Send(resultObject);
 			
-            var resultString:String = formatString("Result:\n{0} objects\nwith {1} fps\nscreen: {2}x{3}\nmemory: {4}mb\ntime: {5}sec",
-                                                   mContainer.numChildren, resultObject.fps, mScreenWidth, mScreenHeight, resultObject.memory, formatedTime);
+			if (mOptions.queued) {
+				mBackButton.text = Game.currentQueue.finished ? "Back" : "Next";
+				mBackButton.enabled = true;
+			}			
+			
+            var resultString:String = formatString("Result:\n{0} {6}\nwith {1} fps\nscreen: {2}x{3}\nmemory: {4}mb\ntime: {5}sec",
+                                                   mContainer.numChildren, resultObject.fps, mScreenWidth, mScreenHeight, resultObject.memory, formatedTime, mOptions.type);
             mResultText = new TextField(290, 300, resultString);
 			mResultText.color = 0xffffff;
             mResultText.fontSize = 28;
