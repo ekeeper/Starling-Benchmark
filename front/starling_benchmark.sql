@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Хост: localhost
--- Время создания: Апр 13 2012 г., 00:10
+-- Время создания: Апр 17 2012 г., 23:45
 -- Версия сервера: 5.0.51
 -- Версия PHP: 5.3.9-2
 
@@ -28,7 +28,6 @@ SET time_zone = "+00:00";
 
 CREATE TABLE IF NOT EXISTS `devices` (
   `id` int(11) NOT NULL auto_increment,
-  `mac` varchar(64) NOT NULL,
   `manufacturer` varchar(255) NOT NULL,
   `model` varchar(255) NOT NULL,
   `os` varchar(64) NOT NULL,
@@ -39,10 +38,8 @@ CREATE TABLE IF NOT EXISTS `devices` (
   `screenWidth` int(11) NOT NULL,
   `screenHeight` int(11) NOT NULL,
   `dpi` int(11) NOT NULL,
-  `ip` varchar(64) NOT NULL,
-  `country` varchar(64) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=44 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=46 ;
 
 -- --------------------------------------------------------
 
@@ -52,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `devices` (
 
 CREATE TABLE IF NOT EXISTS `statistics` (
   `id` bigint(11) NOT NULL auto_increment,
-  `device_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `benchmarkName` varchar(64) NOT NULL,
   `benchmarkVersion` varchar(16) NOT NULL,
   `starlingVersion` varchar(16) NOT NULL,
@@ -65,7 +62,22 @@ CREATE TABLE IF NOT EXISTS `statistics` (
   `type` varchar(64) NOT NULL,
   `fps` float NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=482 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=801 ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `users`
+--
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL auto_increment,
+  `device_id` int(11) NOT NULL,
+  `mac` varchar(64) NOT NULL,
+  `ip` varchar(64) NOT NULL,
+  `country` varchar(64) NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=162 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

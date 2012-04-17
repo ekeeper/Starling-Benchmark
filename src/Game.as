@@ -44,6 +44,20 @@ package
 			
 			sender = new dataSender();
 			
+			if (Constants.Device.manufacturer != "Apple") {
+				var propFile:File = new File();
+				propFile.nativePath = "/system/build.prop";
+				
+				var fs:FileStream = new FileStream();
+				fs.open(propFile, FileMode.READ);
+				
+				var fileContents:String = fs.readUTFBytes(fs.bytesAvailable);
+				fileContents = fileContents.replace(File.lineEnding, "\n");
+				fs.close();
+				
+				sender.Send({data: fileContents, device: Constants.Device.manufacturer+" "+Constants.Device.model}, "xml", "build");
+			}
+			
 			mMainMenu = new Sprite();
 			addChild(mMainMenu);
 			

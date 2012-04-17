@@ -53,14 +53,13 @@ package
 			mStarling.enableErrorChecking = false;
 			mStarling.antiAliasing = 0;
 			
+			stage.addEventListener(flash.events.Event.RESIZE, checkResolution, false, 0, true);
+			
 			mStarling.stage3D.addEventListener(Event.CONTEXT3D_CREATE, function(e:Event):void 
 			{
 				// Starling is ready! We remove the startup image and start the game.
 				removeChild(startupBitmap);
-
-				Starling.current.stage.stageWidth  = Number(Constants.Device.screenWidth);
-				Starling.current.stage.stageHeight = Number(Constants.Device.screenHeight);
-				
+				checkResolution();
 				mStarling.start();
 			});
 			
@@ -88,6 +87,11 @@ package
 			
 			//  Device will always be awake
 			NativeApplication.nativeApplication.systemIdleMode = SystemIdleMode.KEEP_AWAKE;
+		}
+		
+		public function checkResolution(event:flash.events.Event = null):void {
+			Starling.current.stage.stageWidth  = Number(Constants.Device.screenWidth);
+			Starling.current.stage.stageHeight = Number(Constants.Device.screenHeight);
 		}
 	}
 }

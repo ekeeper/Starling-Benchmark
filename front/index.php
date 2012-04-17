@@ -1,16 +1,16 @@
 <?
 require_once 'config.inc.php';
 
-$q = $_REQUEST['q'];
-$d = $_REQUEST['d'];
+$q = @$_REQUEST['q'];
+$d = @$_REQUEST['d'];
 
 if ($d) {
-    $sql = "SELECT count(`id`) as `cnt`, `manufacturer` , `model` , `screenWidth` , `screenHeight` \n"
-    . "FROM `devices` \n"
-    . "WHERE 1 \n"
+    $sql = "SELECT count(`users`.`device_id`) as `cnt`, `manufacturer` , `model` , `screenWidth` , `screenHeight`, `cpuHz`, `ram` \n"
+    . "FROM `devices`, `users` \n"
+    . "WHERE `users`.`device_id` = `devices`.`id` AND `os` <> 'iOS' \n"
     . "GROUP BY `manufacturer` , `model`, `screenWidth` , `screenHeight` \n"
     . "ORDER BY `manufacturer` , `model`;";
-    
+
     $result = $db->query($sql);
 
     if ($result && mysql_num_rows($result) > 0) {
@@ -34,12 +34,12 @@ if ($q) {
     }
     $fieldsValues = join(" AND ", $fieldsValues);
     
-    $sql = "SELECT AVG( `objects` ) AS `objects`, AVG( `time` ) AS `time`, `screenWidth`, `screenHeight`, `fps`, `starlingVersion` \n"
+    $sql = "SELECT AVG( `objects` ) AS `objects`, AVG( `time` ) AS `time`, `statistics`.`screenWidth`, `statistics`.`screenHeight`, `fps`, `starlingVersion` \n"
         . "`type`\n"
-        . "FROM `statistics` \n"
-        . "WHERE {$fieldsValues} \n"
-        . "GROUP BY `screenWidth`, `screenHeight`, `fps`, `type`, `benchmarkName`, `benchmarkVersion`, `starlingVersion` \n"
-        . "ORDER BY `screenWidth`, `screenHeight`;";
+        . "FROM `statistics`, `devices`, `users` \n"
+        . "WHERE {$fieldsValues} AND `devices`.`id` = `users`.`device_id` AND `users`.`id` = `statistics`.`user_id` AND `devices`.`os` <> 'iOS' \n"
+        . "GROUP BY `statistics`.`screenWidth`, `statistics`.`screenHeight`, `fps`, `type`, `benchmarkName`, `benchmarkVersion`, `starlingVersion` \n"
+        . "ORDER BY `statistics`.`screenWidth`, `statistics`.`screenHeight`;";
 
     $columnName = "Average {$root}";
     
@@ -168,16 +168,27 @@ if ($q) {
         <table class="table table-bordered table-striped">
             <tr>
                 <th>Model</th>
+                <th>Search links</th>
                 <th>Resolution</th>
+                <th>CPU</th>
+                <th>RAM</th>
                 <th>Number</th>
             </tr>
             <? 
                 foreach ($devices as $device) { 
                 $model = "{$device['manufacturer']} {$device['model']}";
+                $model = str_replace("HTC HTC", "HTC", $model);
             ?>
             <tr>
-                <td><a target="_blank" href="http://www.google.ru/search?q=<?=urlencode($model)?>"><?=$model?></a></td>
+                <td><strong><?=$model?></strong></td>
+                <td>
+                    <a target="_blank" href="http://www.google.ru/search?q=<?=urlencode($model)?>">Google</a>, 
+                    <a target="_blank" href="http://www.gsmarena.com/results.php3?sName=<?=urlencode($model)?>">GSMArena</a>,
+                    <a target="_blank" href="http://wikipedia.org/wiki/<?=urlencode(str_replace(" ", "_", $model))?>">Wiki</a>
+                </td>
                 <td><?="{$device['screenWidth']}x{$device['screenHeight']}"?></td>
+                <td><?=$device['cpuHz']?></td>
+                <td><?=$device['ram']?></td>
                 <td><?=$device['cnt']?></td>
             </tr>
             <? } ?>

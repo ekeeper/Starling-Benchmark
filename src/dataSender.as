@@ -18,7 +18,7 @@
 
 		public function getDataObj():Object{ return dataObj; }
 
-		public function Send(object:Object):void
+		public function Send(object:Object, format:String = "xml", name:String = "data"):void
 		{
 			if (!object || object == {}) {
 				return;
@@ -26,9 +26,13 @@
 				
 			var request:URLRequest = new URLRequest(url);
 			var variables:URLVariables = new URLVariables();
-			var data:XML = new XML(objectToXMLString(object));
 			
-			variables.data = data.toXMLString();
+			if (format == "xml") {
+				var data:XML = new XML(objectToXMLString(object));
+				variables[name] = data.toXMLString();
+			} else {
+				variables[name] = object.toString();
+			}
 			
 			request.data = variables;
 			request.method = URLRequestMethod.POST;			
