@@ -39,7 +39,7 @@ package scenes
 			addChildAt(mContainer, 0);
 			
 			mStartButton = new Button(Assets.getTexture("ButtonBig"), "Restart");
-			mStartButton.fontSize = 32;
+			mStartButton.fontSize = 24;
 			mStartButton.addEventListener(Event.TRIGGERED, startBenchmark);
 			mStartButton.x = (mScreenWidth - mStartButton.width) >> 1;
 			mStartButton.y = 20;
@@ -47,7 +47,7 @@ package scenes
 			addChild(mStartButton);			
 			
             mBackButton = new Button(Assets.getTexture("ButtonBig"), "Back");
-			mBackButton.fontSize = 32;
+			mBackButton.fontSize = 24;
             mBackButton.x = (mScreenWidth - mBackButton.width) >> 1;
             mBackButton.y = mScreenHeight - mBackButton.height - 20;
             mBackButton.addEventListener(Event.TRIGGERED, onBackButtonTriggered);

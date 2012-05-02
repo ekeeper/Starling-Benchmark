@@ -10,7 +10,6 @@
 
 package starling.core
 {
-    import flash.display3D.*;
     import flash.geom.*;
     
     import starling.display.*;
@@ -39,25 +38,6 @@ package starling.core
         
         private var mQuadBatches:Vector.<QuadBatch>;
         private var mCurrentQuadBatchID:int;
-        
-        private static var sBlendFactors:Array = [ 
-            // no premultiplied alpha
-            { 
-                "none"     : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO ],
-                "normal"   : [ Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ],
-                "add"      : [ Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.DESTINATION_ALPHA ],
-                "multiply" : [ Context3DBlendFactor.DESTINATION_COLOR, Context3DBlendFactor.ZERO ],
-                "screen"   : [ Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE ]
-            },
-            // premultiplied alpha
-            { 
-                "none"     : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO ],
-                "normal"   : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ],
-                "add"      : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ONE ],
-                "multiply" : [ Context3DBlendFactor.DESTINATION_COLOR, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ],
-                "screen"   : [ Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_COLOR ]
-            }
-        ];
         
         /** Helper object. */
         private static var sMatrixCoords:Vector.<Number> = new Vector.<Number>(16, true);
@@ -233,20 +213,19 @@ package starling.core
         
         /** Adds a quad to the current batch of unrendered quads. If there is a state change,
          *  all previous quads are rendered at once, and the batch is reset. */
-        public function batchQuad(quad:Quad, alpha:Number, 
+        public function batchQuad(quad:Quad, parentAlpha:Number, 
                                   texture:Texture=null, smoothing:String=null):void
         {
-            if (currentQuadBatch.isStateChange(quad, texture, smoothing, mBlendMode))
+            if (currentQuadBatch.isStateChange(quad, parentAlpha, texture, smoothing, mBlendMode))
                 finishQuadBatch();
             
-            currentQuadBatch.addQuad(quad, alpha, texture, smoothing, mModelViewMatrix, mBlendMode);
+            currentQuadBatch.addQuad(quad, parentAlpha, texture, smoothing, mModelViewMatrix, mBlendMode);
         }
         
         /** Renders the current quad batch and resets it. */
         public function finishQuadBatch():void
         {
-            currentQuadBatch.syncBuffers();
-            currentQuadBatch.render(mProjectionMatrix);
+            currentQuadBatch.renderCustom(mProjectionMatrix);
             currentQuadBatch.reset();
             
             ++mCurrentQuadBatchID;
@@ -279,7 +258,7 @@ package starling.core
         /** Sets up the blending factors that correspond with a certain blend mode. */
         public static function setBlendFactors(premultipliedAlpha:Boolean, blendMode:String="normal"):void
         {
-            var blendFactors:Array = sBlendFactors[int(premultipliedAlpha)][blendMode];
+            var blendFactors:Array = BlendMode.getBlendFactors(blendMode, premultipliedAlpha); 
             Starling.context.setBlendFactors(blendFactors[0], blendFactors[1]);
         }
         

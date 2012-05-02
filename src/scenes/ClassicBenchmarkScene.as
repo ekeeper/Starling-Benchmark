@@ -13,6 +13,8 @@ package scenes
     import starling.events.Event;
     import starling.text.TextField;
     import starling.textures.Texture;
+    import starling.utils.HAlign;
+    import starling.utils.VAlign;
     import starling.utils.formatString;
 
     public class ClassicBenchmarkScene extends Scene
@@ -182,11 +184,12 @@ package scenes
 			
             var resultString:String = formatString("Result:\n{0} {6}\nwith {1} fps\nscreen: {2}x{3}\nmemory: {4}mb\ntime: {5}sec",
                                                    mContainer.numChildren, resultObject.fps, mScreenWidth, mScreenHeight, resultObject.memory, formatedTime, mOptions.type);
-            mResultText = new TextField(290, 300, resultString);
+            
+			mResultText = new TextField(320, 480, resultString);
 			mResultText.color = 0xffffff;
-            mResultText.fontSize = 28;
-            mResultText.x = (mScreenWidth - mResultText.width) >> 1;
-            mResultText.y = (mScreenHeight - mResultText.height) >> 1;
+            mResultText.fontSize = 30;
+            mResultText.x = (mScreenWidth - mResultText.width) * 0.5;
+            mResultText.y = (mScreenHeight - mResultText.height) * 0.5;
             
             addChild(mResultText);
             

@@ -14,7 +14,6 @@ package starling.display
     import flash.ui.Mouse;
     import flash.ui.MouseCursor;
     
-    import starling.core.QuadBatch;
     import starling.core.RenderSupport;
     import starling.core.Starling;
     import starling.events.Event;
@@ -123,20 +122,25 @@ package starling.display
         public function get isFlattened():Boolean { return mFlattenedContents != null; }
         
         /** @inheritDoc */
-        public override function render(support:RenderSupport, alpha:Number):void
+        public override function render(support:RenderSupport, parentAlpha:Number):void
         {
             if (mFlattenedContents)
             {
                 support.finishQuadBatch();
                 
-                alpha *= this.alpha;
+                var alpha:Number = parentAlpha * this.alpha;
                 var numBatches:int = mFlattenedContents.length;
                 var mvpMatrix:Matrix3D = support.mvpMatrix;
                 
                 for (var i:int=0; i<numBatches; ++i)
-                    mFlattenedContents[i].render(mvpMatrix, alpha);
+                {
+                    var quadBatch:QuadBatch = mFlattenedContents[i];
+                    var blendMode:String = quadBatch.blendMode == BlendMode.AUTO ?
+                                           support.blendMode : quadBatch.blendMode;
+                    quadBatch.renderCustom(mvpMatrix, alpha, blendMode);
+                }
             }
-            else super.render(support, alpha);
+            else super.render(support, parentAlpha);
         }
     }
 }

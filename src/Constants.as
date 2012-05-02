@@ -25,35 +25,38 @@ package
 			var devStr:String = Capabilities.os;
 			var devStrArr:Array = devStr.split(" ");
 			devStr = devStrArr.pop();
-			devStr = (devStr.indexOf(",") > -1)?devStr.split(",").shift():devStr;
+			devStr = (devStr.indexOf(",") > -1) ? devStr.split(",").shift() : devStr;
 			
 			device.manufacturer = "Apple";
-			device.model = devStr;
 			device.os = "iOS";
 			device.osVersion = devStrArr.pop();
 			device.cpu = "ARM v7";
 			device.cpuHz = "1GHz";
 			
-			if ((devStr == "iPhone1") || (devStr == "iPhone2") || (devStr == "iPhone3") || (devStr == "iPod3")){
+			if ((devStr == "iPhone1") || (devStr == "iPhone2") || (devStr == "iPod3")){
 				// lowdef iphone, 3, 3g, 3gs
 				device.screenWidth = 320;
 				device.screenHeight = 480;
+				device.model = (devStr == "iPod3") ? "iPod 3" : "iPhone 3GS";
 				device.cpuHz = "833MHz";
 				device.ram = "256MB";
-			} else if ((devStr == "iPhone4") || (devStr == "iPod4")){
+			} else if ((devStr == "iPhone3") || (devStr == "iPhone4") || (devStr == "iPod4")){
 				// highdef iphone 4, 4s
 				device.screenWidth = 640;
 				device.screenHeight = 960;
+				device.model = (devStr == "iPod4") ? "iPod 4" : ("iPhone 4"+((devStr == "iPhone4") ? "S" : ""));
 				device.ram = (devStr == "iPod4") ? "256MB" : "512MB";
 			} else if ((devStr == "iPad1") || (devStr == "iPad2")){
 				// ipad 1,2
 				device.screenWidth = 768;
 				device.screenHeight = 1024;
+				device.model = (devStr == "iPad1") ? "iPad 1" : "iPad 2";
 				device.ram = (devStr == "iPad1") ? "256MB" : "512MB";
 			} else if ((devStr == "iPad3")){
 				// new iPad
 				device.screenWidth = 1536;
 				device.screenHeight = 2048;
+				device.model = "iPad 3";
 				device.ram = "1GB";
 			} else {
 				device.screenWidth = Capabilities.screenResolutionX;
@@ -80,6 +83,10 @@ package
 				}
 				
 			}
+			
+			// temporary hack
+			//device.screenWidth = Capabilities.screenResolutionX;
+			//device.screenHeight = Capabilities.screenResolutionY;
 			
 			if (isLandscape && device.manufacturer == "Apple") {
 				var swap:Number = device.screenWidth; 

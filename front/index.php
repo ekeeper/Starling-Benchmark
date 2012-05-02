@@ -172,7 +172,7 @@ if ($q) {
                 <th>Resolution</th>
                 <th>CPU</th>
                 <th>RAM</th>
-                <th>Number</th>
+                <th>Count</th>
             </tr>
             <? 
                 foreach ($devices as $device) { 
@@ -215,7 +215,7 @@ if ($q) {
               <p><a class="btn" href="http://forum.starling-framework.org/topic/starling-benchmark-for-mobile-devices">View details &raquo;</a></p>
             </div><!--/span-->
             <div class="span4">
-              <p><img src="http://qrcode.kaywa.com/img.php?s=5&d=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dair.com.dustunited.StarlingBenchmark"</p>
+              <p><img src="http://qrcode.kaywa.com/img.php?s=5&d=market%3A%2F%2Fdetails%3Fid%3Dair.com.dustunited.StarlingBenchmark"</p>
             </div><!--/span-->
           </div><!--/row-->
           <? } ?>

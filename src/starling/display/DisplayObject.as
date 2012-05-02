@@ -84,7 +84,7 @@ package starling.display
      *  subclass DisplayObject:</p>
      *  
      *  <ul>
-     *    <li><code>function render(support:RenderSupport, alpha:Number):void</code></li>
+     *    <li><code>function render(support:RenderSupport, parentAlpha:Number):void</code></li>
      *    <li><code>function getBounds(targetSpace:DisplayObject, 
      *                                 resultRect:Rectangle=null):Rectangle</code></li>
      *  </ul>
@@ -127,8 +127,6 @@ package starling.display
         private static var sHelperRect:Rectangle = new Rectangle();
         private static var sHelperMatrix:Matrix  = new Matrix();
         private static var sTargetMatrix:Matrix  = new Matrix();
-        
-        protected static var sRectCount:int = 0;
         
         /** @private */ 
         public function DisplayObject()
@@ -309,8 +307,8 @@ package starling.display
         /** Renders the display object with the help of a support object. Never call this method
          *  directly, except from within another render method.
          *  @param support Provides utility functions for rendering.
-         *  @param alpha The accumulated alpha value from the object's parent up to the stage. */
-        public function render(support:RenderSupport, alpha:Number):void
+         *  @param parentAlpha The accumulated alpha value from the object's parent up to the stage. */
+        public function render(support:RenderSupport, parentAlpha:Number):void
         {
             throw new AbstractMethodError("Method needs to be implemented in subclass");
         }
@@ -452,13 +450,7 @@ package starling.display
          *   @default auto
          *   @see starling.display.BlendMode */ 
         public function get blendMode():String { return mBlendMode; }
-        public function set blendMode(value:String):void 
-        {
-            if (BlendMode.isValid(value))
-                mBlendMode = value;
-            else
-                throw new ArgumentError("Invalid blend mode: " + value);
-        }
+        public function set blendMode(value:String):void { mBlendMode = value; }
         
         /** The name of the display object (default: null). Used by 'getChildByName()' of 
          *  display object containers. */

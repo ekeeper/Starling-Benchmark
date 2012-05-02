@@ -42,6 +42,8 @@ package
 		{
 			removeEventListener( Event.ADDED_TO_STAGE, Init );
 			
+			//Starling.current.showStats = true;
+			
 			sender = new dataSender();
 			
 			if (Constants.Device.manufacturer != "Apple") {
@@ -64,7 +66,7 @@ package
 			var nativeRes:String = Constants.Device.screenWidth+"x"+Constants.Device.screenHeight;
 			
 			var buttons:Array = [
-				["Classic benchmarks", "parceClassicQueue"],
+				["Classic benchmarks", "parceClassicQueue"]
 			];
 			
 			if (Constants.Device.manufacturer != "Apple") {
@@ -92,13 +94,13 @@ package
 			
 			addEventListener(Scene.CLOSING, onSceneClosing);
 			
-            // show information about rendering method (hardware/software)
             var deviceInfo:String = 
 				"Device: " +
 					Constants.Device.manufacturer + ", " +
 					Constants.Device.model + ", " +
 					Constants.Device.os + " " +
 					Constants.Device.osVersion +
+				"\nOS: " + Capabilities.os + 
 				"\nCPU: " + Constants.Device.cpuHz + 
 				", RAM: " + Constants.Device.ram +
 				"\nDriver: " + Starling.context.driverInfo + 
@@ -116,9 +118,7 @@ package
 			var button:Button = new Button(buttonTexture, title);
 			
 			if (title != "") {
-				button.text = title;
-				button.fontName = "Ubuntu";
-				button.fontSize = 24;
+				button.fontSize = 20;
 			}
 			
 			button.pivotX = button.width >> 1;
@@ -134,7 +134,7 @@ package
 		
 		private function createTF(x:Number, y:Number, width:Number, height:Number, text:String = "", color:int = 0xfaf3e0, size:int = 14):TextField
 		{
-			var TF:TextField = new TextField(width, height, text, "Ubuntu", size);
+			var TF:TextField = new TextField(width, height, text, "Verdana", size);
 			TF.color = color;
 			TF.x = x;
 			TF.y = y;

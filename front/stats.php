@@ -108,11 +108,26 @@ if ($data) {
                 
                 $user["device_id"] = $deviceId;
                 
-                $keys = join("`, `", array_keys($user));
-                $values = join("', '", array_values($user));
-                $sql = "INSERT INTO `users` (`id`, `{$keys}`) VALUES (NULL, '{$values}');";
-                $db->query($sql);
-                $userId = $db->insert_id();
+                if (trim($device['mac']) == "") {
+                    $sql ="SELECT id FROM `users` WHERE `ip` = '{$device['ip']}' AND device_id = {$deviceId} LIMIT 1";
+                    $result = $db->query($sql);
+                    $num_rows = ($result) ? mysql_num_rows($result) : 0;
+                
+                    if ($num_rows > 0) {
+                        $row = mysql_fetch_assoc($result);
+                        $userId = STR_FROM_DB($row['id']);
+                    } else {
+                        $userId = -1;
+                    }
+                }
+                
+                if ($userId < 0 || trim($device['mac']) != "") {
+                    $keys = join("`, `", array_keys($user));
+                    $values = join("', '", array_values($user));
+                    $sql = "INSERT INTO `users` (`id`, `{$keys}`) VALUES (NULL, '{$values}');";
+                    $db->query($sql);
+                    $userId = $db->insert_id();
+                }
             }
 
             unset($data["device"]);
