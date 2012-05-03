@@ -38,7 +38,7 @@ package
 			
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
-			stage.quality = StageQuality.LOW;
+			//stage.quality = StageQuality.LOW; // Don't use it please! TextFields and Buttons will not work correctly!
 			
 			// While Stage3D is initializing, the screen will be blank. To avoid any flickering, 
 			// we display the background image for now, but will remove it below, when Starling

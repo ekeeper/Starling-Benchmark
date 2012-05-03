@@ -6,6 +6,7 @@ package scenes
     
     import starling.core.Starling;
     import starling.display.Button;
+    import starling.display.DisplayObject;
     import starling.display.Image;
     import starling.display.MovieClip;
     import starling.display.Sprite;
@@ -13,8 +14,6 @@ package scenes
     import starling.events.Event;
     import starling.text.TextField;
     import starling.textures.Texture;
-    import starling.utils.HAlign;
-    import starling.utils.VAlign;
     import starling.utils.formatString;
 
     public class ClassicBenchmarkScene extends Scene
@@ -105,7 +104,7 @@ package scenes
             var passedTime:Number = event.passedTime;
             
             for (var i:int=0; i<numObjects; ++i)
-                mContainer.getChildAt(i).rotation += Math.PI / 2 * passedTime;
+                mContainer.getChildAt(i).rotation += passedTime * (Math.PI >> 1);
         }
         
 		override protected function startBenchmark(event:Event = null):void
@@ -142,8 +141,7 @@ package scenes
 		{
 			var im:Image = new Image(mTexture); 
 			
-			im.x = mPadding + Math.random() * (mScreenWidth - 2 * mPadding);
-			im.y = mPadding + Math.random() * (mScreenHeight - 2 * mPadding);
+			initCoords(im);
 			mContainer.addChild(im);
 		}
 		
@@ -152,9 +150,14 @@ package scenes
 			var mc:MovieClip = new MovieClip(mFrames, Math.floor(5+Math.random()*10));
 			Starling.juggler.add(mc);
 			
-			mc.x = mPadding + Math.random() * (mScreenWidth - 2 * mPadding);
-			mc.y = mPadding + Math.random() * (mScreenHeight - 2 * mPadding);
+			initCoords(mc);
 			mContainer.addChild(mc);
+		}
+		
+		private function initCoords(dObj:DisplayObject):void
+		{
+			dObj.x = mPadding + Math.random() * (mScreenWidth - 2 * mPadding);
+			dObj.y = mPadding + Math.random() * (mScreenHeight - 2 * mPadding);
 		}
 		
         private function benchmarkComplete():void
@@ -188,8 +191,8 @@ package scenes
 			mResultText = new TextField(320, 480, resultString);
 			mResultText.color = 0xffffff;
             mResultText.fontSize = 30;
-            mResultText.x = (mScreenWidth - mResultText.width) * 0.5;
-            mResultText.y = (mScreenHeight - mResultText.height) * 0.5;
+            mResultText.x = (mScreenWidth - mResultText.width) >> 1;
+            mResultText.y = (mScreenHeight - mResultText.height) >> 1;
             
             addChild(mResultText);
             

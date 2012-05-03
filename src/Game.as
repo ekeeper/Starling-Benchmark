@@ -10,6 +10,7 @@ package
 	
 	import scenes.ClassicBenchmarkScene;
 	import scenes.Scene;
+	import scenes.StressBenchmarkScene;
 	
 	import starling.core.Starling;
 	import starling.display.BlendMode;
@@ -28,6 +29,8 @@ package
 		public static var currentQueue:Queue;
 		
 		private var mClassicQueue:Queue = new Queue(new <Function>[classicBenchmark1, classicBenchmark2, classicBenchmark3, classicBenchmark4]);
+		private var mStressQueue:Queue = new Queue(new <Function>[stressBenchmark1, stressBenchmark2, stressBenchmark3, stressBenchmark4, 
+																  stressBenchmark5, stressBenchmark6, stressBenchmark7, stressBenchmark8]);
 		
 		private var mInfoText:TextField;
 		private var mMainMenu:Sprite;
@@ -66,7 +69,8 @@ package
 			var nativeRes:String = Constants.Device.screenWidth+"x"+Constants.Device.screenHeight;
 			
 			var buttons:Array = [
-				["Classic benchmarks", "parceClassicQueue"]
+				["Classic benchmarks", "parceClassicQueue"],
+				["Stress benchmarks",  "parceStressQueue"]
 			];
 			
 			if (Constants.Device.manufacturer != "Apple") {
@@ -182,13 +186,25 @@ package
 			addChild(mCurrentScene);
 		}
 		
+		private function parceCurrentQueue(event:Event):void {
+			currentQueue.reset();
+			currentQueue.nextCommand(event);
+		}
+		
+		
 		// BENCHMARKS
 		
 		private function parceClassicQueue(event:Event):void {
 			currentQueue = mClassicQueue;
-			currentQueue.reset()
-			currentQueue.nextCommand(event);
+			parceCurrentQueue(event);
 		}
+		
+		private function parceStressQueue(event:Event):void {
+			currentQueue = mStressQueue;
+			parceCurrentQueue(event);
+		}
+		
+		// Classic Benchmark
 		
 		private function classicBenchmark1(event:Event):void {
 			var options:Object = {
@@ -224,6 +240,88 @@ package
 				type:"MovieClips"
 			};
 			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
+		}
+		
+		// Classic Benchmark
+		
+		private function stressBenchmark1(event:Event):void {
+			var options:Object = {
+				queued:true,
+				time:30000, 
+				count:100, 
+				type:"Images"
+			};
+			showScene(getQualifiedClassName(StressBenchmarkScene), options);
+		}
+		
+		private function stressBenchmark2(event:Event):void {
+			var options:Object = {
+				queued:true,
+				time:30000, 
+				count:100, 
+				type:"MovieClips"
+			};
+			showScene(getQualifiedClassName(StressBenchmarkScene), options);
+		}
+		
+		private function stressBenchmark3(event:Event):void {
+			var options:Object = {
+				queued:true,
+				time:30000, 
+				count:500, 
+				type:"Images"
+			};
+			showScene(getQualifiedClassName(StressBenchmarkScene), options);
+		}
+		
+		private function stressBenchmark4(event:Event):void {
+			var options:Object = {
+				queued:true,
+				time:30000, 
+				count:500, 
+				type:"MovieClips"
+			};
+			showScene(getQualifiedClassName(StressBenchmarkScene), options);
+		}
+		
+		private function stressBenchmark5(event:Event):void {
+			var options:Object = {
+				queued:true,
+				time:30000, 
+				count:1000, 
+				type:"Images"
+			};
+			showScene(getQualifiedClassName(StressBenchmarkScene), options);
+		}
+		
+		private function stressBenchmark6(event:Event):void {
+			var options:Object = {
+				queued:true,
+				time:30000, 
+				count:1000, 
+				type:"MovieClips"
+			};
+			showScene(getQualifiedClassName(StressBenchmarkScene), options);
+		}		
+		
+		private function stressBenchmark7(event:Event):void {
+			var options:Object = {
+				queued:true,
+				time:30000, 
+				count:2000, 
+				type:"Images"
+			};
+			showScene(getQualifiedClassName(StressBenchmarkScene), options);
+		}
+		
+		private function stressBenchmark8(event:Event):void {
+			var options:Object = {
+				queued:true,
+				time:30000, 
+				count:2000, 
+				type:"MovieClips"
+			};
+			showScene(getQualifiedClassName(StressBenchmarkScene), options);
 		}		
 	}
 }

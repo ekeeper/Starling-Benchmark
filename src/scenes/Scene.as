@@ -28,9 +28,13 @@ package scenes
 			mScreenWidth = Number(Constants.Device.screenWidth); 
 			mScreenHeight = Number(Constants.Device.screenHeight);
 			
-			Starling.current.stop();
-			Starling.current.nativeStage.frameRate = options.frameRate;
-			Starling.current.start();
+			options.frameRate ||= 60;
+			
+			if (Starling.current.nativeStage.frameRate != options.frameRate) {
+				Starling.current.stop();
+				Starling.current.nativeStage.frameRate = options.frameRate;
+				Starling.current.start();
+			}
 			
 			// the container will hold all test objects
 			mContainer = new Sprite();
