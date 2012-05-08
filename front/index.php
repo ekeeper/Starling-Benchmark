@@ -3,24 +3,54 @@ require_once 'config.inc.php';
 
 $q = @$_REQUEST['q'];
 $d = @$_REQUEST['d'];
+$c = @$_REQUEST['c'];
 
 if ($d) {
-    $sql = "SELECT count(`users`.`device_id`) as `cnt`, `manufacturer` , `model` , `screenWidth` , `screenHeight`, `cpuHz`, `ram` \n"
-    . "FROM `devices`, `users` \n"
-    . "WHERE `users`.`device_id` = `devices`.`id` AND `os` <> 'iOS' \n"
-    . "GROUP BY `manufacturer` , `model`, `screenWidth` , `screenHeight` \n"
-    . "ORDER BY `manufacturer` , `model`;";
+    if ($d == "resolutions") {
+        $sql = "SELECT COUNT( `users`.`device_id` ) AS `cnt` , `screenWidth` , `screenHeight`\n"
+        . "FROM `devices` , `users` \n"
+        . "WHERE `users`.`device_id` = `devices`.`id` \n"
+        . "AND `os` <> 'iOS'\n"
+        . "GROUP BY `screenWidth` , `screenHeight` \n"
+        . "ORDER BY `screenWidth`";        
+        
+        $columnName = "Count";
 
-    $result = $db->query($sql);
+        $base = "Resolutions";
+        $title = "Count of devices by resolution";
 
-    if ($result && mysql_num_rows($result) > 0) {
-        $devices = array();
-        while ($row = mysql_fetch_assoc($result)) {
-            $devices[] = $row;
+        $result = $db->query($sql);
+
+        if ($result && mysql_num_rows($result) > 0) {
+            $rows = array();
+            while ($row = mysql_fetch_assoc($result)) {
+                $rows[] = "['".
+                    STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight'])."', ".
+                    STR_FROM_DB($row['cnt'])."]";
+            }
+
+            $rows = join(", ", $rows);
+        } else {
+            $d = null;
         }
     } else {
-        $d = null;
-    }    
+        $sql = "SELECT count(`users`.`device_id`) as `cnt`, `manufacturer` , `model` , `screenWidth` , `screenHeight`, `cpuHz`, `ram` \n"
+        . "FROM `devices`, `users` \n"
+        . "WHERE `users`.`device_id` = `devices`.`id` AND `os` <> 'iOS' \n"
+        . "GROUP BY `manufacturer` , `model`, `screenWidth` , `screenHeight` \n"
+        . "ORDER BY `manufacturer` , `model`;";
+    
+        $result = $db->query($sql);
+
+        if ($result && mysql_num_rows($result) > 0) {
+            $devices = array();
+            while ($row = mysql_fetch_assoc($result)) {
+                $devices[] = $row;
+            }
+        } else {
+            $d = null;
+        }    
+    }
 }
 
 if ($q) {
@@ -33,7 +63,7 @@ if ($q) {
         $aroot = "objects";
     }
     
-    $data[$aroot] = $count;
+    if (!$c) $data[$aroot] = $count;
     
     $fieldsKeys = array_keys($data);
     $fieldsValues = array();
@@ -42,8 +72,7 @@ if ($q) {
     }
     $fieldsValues = join(" AND ", $fieldsValues);
     
-    $sql = "SELECT AVG( `{$root}` ) AS `{$root}`, `statistics`.`screenWidth`, `statistics`.`screenHeight`, `{$aroot}`, `starlingVersion` \n"
-        . "`type`\n"
+    $sql = "SELECT AVG( `{$root}` ) AS `{$root}`, `statistics`.`screenWidth`, `statistics`.`screenHeight`, `type`, `{$aroot}` \n"
         . "FROM `statistics`, `devices`, `users` \n"
         . "WHERE {$fieldsValues} AND `devices`.`id` = `users`.`device_id` AND `users`.`id` = `statistics`.`user_id` AND `devices`.`os` <> 'iOS' \n"
         . "GROUP BY `statistics`.`screenWidth`, `statistics`.`screenHeight`, `{$aroot}`, `type`, `benchmarkName`, `benchmarkVersion` \n" //, `starlingVersion`
@@ -56,22 +85,51 @@ if ($q) {
     }
     
     $base = "Resolutions";
-    $title = "{$data["benchmarkName"]}: {$data["type"]}, {$data[$aroot]} {$aroot}, {$root}";
+    $title = "{$data["benchmarkName"]}: {$data["type"]}, ".($c?"":"{$data[$aroot]} ")."{$aroot}, {$root}";
 
     $result = $db->query($sql);
 
     if ($result && mysql_num_rows($result) > 0) {
         $rows = array();
+        if ($c) $keys = array();
+        
         while ($row = mysql_fetch_assoc($result)) {
             $rootData = ($root == "time") ? round($row['time']/1000,2) : $row[$root];
-            $rows[] = "['".
-                STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight'])."', ".
-                STR_FROM_DB($rootData)."]";
+            if ($c) {
+                $rows[STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight'])][$row[$aroot]] = STR_FROM_DB($rootData);
+                if (!in_array($row[$aroot], $keys)) {
+                    $keys[] = $row[$aroot];
+                }
+            } else {
+                $rows[] = "['".
+                    STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight'])."', ".
+                    STR_FROM_DB($rootData)."]";
+            }
         }
-        
-        $rows = join(", ", $rows);
+
+        if (!$c) {
+            $rows = join(", \n", $rows);
+        } else if (count($rows)) {
+            $trows = array();
+            $trows[] = "['{$base}', '".join(" {$aroot}', '", $keys)." {$aroot}', 'Average']";
+            
+            foreach ($rows as $res => $vals) { 
+                $avg = 0;
+                foreach ($keys as $key) {
+                    if (!$vals[$key]) $vals[$key] = 0;
+                    $avg += $vals[$key];
+                }
+                $avg /= count($keys);
+                
+                $trows[] = "['{$res}', ".join(", ", $vals).", {$avg}]";
+            }
+
+            $rows = join(", \n", $trows);
+            $c = count($keys);
+        }
     } else {
         $q = null;
+        $c = null;
     }
 }
 ?>
@@ -109,12 +167,13 @@ if ($q) {
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png"> -->
 
-    <? if ($q) { ?>
+    <? if ($q || ($d && $d == "resolutions")) { ?>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
       function drawChart() {
+    <? if (($q && !$c) || ($d && $d == "resolutions")) { ?>
         var data = new google.visualization.DataTable();
         data.addColumn('string', '<?=$base?>');
         data.addColumn('number', '<?=$columnName?>');
@@ -123,11 +182,25 @@ if ($q) {
         ]);
 
         var options = {
-          title: '<?=$title?>',
-          //hAxis: {title: 'Year', titleTextStyle: {color: 'red'}}
+          title: '<?=$title?>'
         };
 
-        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        var chart = new google.visualization.<?=($q)?"ColumnChart":"PieChart" ?>(document.getElementById('chart_div'));
+    <? } else if ($q && $c) { ?>
+        var data = google.visualization.arrayToDataTable([
+            <?=$rows?>
+        ]);
+
+        var options = {
+          title : '<?=$title?>',
+          vAxis: {title: "<?=ucfirst($root)?>"},
+          hAxis: {title: "<?=$base?>"},
+          seriesType: "bars",
+          series: {<?=$c?>: {type: "line"}}
+        };
+
+        var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));        
+    <? } ?>
         chart.draw(data, options);
       }
     </script>
@@ -165,6 +238,9 @@ if ($q) {
               <li><a href="/starling/benchmark?q=Classic_Images_60_objects">Images, 60fps, objects</a></li>
               <li><a href="/starling/benchmark?q=Classic_MovieClips_30_objects">MovieClips, 30fps, objects</a></li>
               <li><a href="/starling/benchmark?q=Classic_MovieClips_60_objects">MovieClips, 60fps, objects</a></li>
+              <li class="nav-header"></li>
+              <li><a href="/starling/benchmark?q=Classic_Images_0_objects&c=true">Composite chart: Images</a></li>
+              <li><a href="/starling/benchmark?q=Classic_MovieClips_0_objects&c=true">Composite chart: MovieClips</a></li>
               <li class="nav-header">Stress Benchmark Reports</li>
               <li><a href="/starling/benchmark?q=Stress_Images_100_fps">Images, 100 objects, fps</a></li>
               <li><a href="/starling/benchmark?q=Stress_Images_500_fps">Images, 500 objects, fps</a></li>
@@ -174,14 +250,18 @@ if ($q) {
               <li><a href="/starling/benchmark?q=Stress_MovieClips_500_fps">MovieClips, 500 objects, fps</a></li>
               <li><a href="/starling/benchmark?q=Stress_MovieClips_1000_fps">MovieClips, 1000 objects, fps</a></li>
               <li><a href="/starling/benchmark?q=Stress_MovieClips_2000_fps">MovieClips, 2000 objects, fps</a></li>
+              <li class="nav-header"></li>
+              <li><a href="/starling/benchmark?q=Stress_Images_0_fps&c=true">Composite chart: Images</a></li>
+              <li><a href="/starling/benchmark?q=Stress_MovieClips_0_fps&c=true">Composite chart: MovieClips</a></li>
               <li class="nav-header">Devices</li>
               <li><a href="/starling/benchmark?d=all">All benchmarked devices</a></li>
+              <li><a href="/starling/benchmark?d=resolutions">Resolutions chart</a></li>
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span9">
           
-          <? if ($d) { ?>
+          <? if ($d && $d != "resolutions") { ?>
         <table class="table table-bordered table-striped">
             <tr>
                 <th>Model</th>
@@ -192,9 +272,11 @@ if ($q) {
                 <th>Count</th>
             </tr>
             <? 
+                $total = 0;    
                 foreach ($devices as $device) { 
-                $model = "{$device['manufacturer']} {$device['model']}";
-                $model = str_replace("HTC HTC", "HTC", $model);
+                    $model = "{$device['manufacturer']} {$device['model']}";
+                    $model = str_replace("HTC HTC", "HTC", $model);
+                    $total += $device['cnt'];
             ?>
             <tr>
                 <td><strong><?=$model?></strong></td>
@@ -209,8 +291,16 @@ if ($q) {
                 <td><?=$device['cnt']?></td>
             </tr>
             <? } ?>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><strong>Total:</strong></td>
+                <td><?=$total?></td>
+            </tr>
         </table>
-          <? } else if ($q) { ?>
+          <? } else if ($q || ($d && $d == "resolutions")) { ?>
           <div id="chart_div" style="width: 100%; height: 500px;"></div>
           <? } else { ?>
           <div class="hero-unit">
