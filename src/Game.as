@@ -45,8 +45,6 @@ package
 		{
 			removeEventListener( Event.ADDED_TO_STAGE, Init );
 			
-			//Starling.current.showStats = true;
-			
 			sender = new dataSender();
 			
 			if (Constants.Device.manufacturer != "Apple") {
@@ -98,22 +96,26 @@ package
 			
 			addEventListener(Scene.CLOSING, onSceneClosing);
 			
-            var deviceInfo:String = 
-				"Device: " +
-					Constants.Device.manufacturer + ", " +
-					Constants.Device.model + ", " +
-					Constants.Device.os + " " +
-					Constants.Device.osVersion +
-				"\nOS: " + Capabilities.os + 
-				"\nCPU: " + Constants.Device.cpuHz + 
-				", RAM: " + Constants.Device.ram +
-				"\nDriver: " + Starling.context.driverInfo + 
-				"\nScreen: " + Constants.Device.screenWidth+"x"+Constants.Device.screenHeight +
-				", ScreenDPI: " + Constants.Device.dpi +
-				"\nMAC: " + Constants.Device.mac;
-			
-			mInfoText = createTF(3, 3, Constants.Device.screenWidth, Constants.Device.screenHeight, deviceInfo, 0xffffff, 20);			
-			mMainMenu.addChild(mInfoText);
+			if (Constants.Device.screenWidth > 320){
+	            var deviceInfo:String = 
+					"Device: " +
+						Constants.Device.manufacturer + ", " +
+						Constants.Device.model + ", " +
+						Constants.Device.os + " " +
+						Constants.Device.osVersion +
+					"\nOS: " + Capabilities.os + 
+					"\nCPU: " + Constants.Device.cpuHz + 
+					", RAM: " + Constants.Device.ram +
+					"\nDriver: " + Starling.context.driverInfo + 
+					"\nScreen: " + Constants.Device.screenWidth+"x"+Constants.Device.screenHeight +
+					", ScreenDPI: " + Constants.Device.dpi +
+					"\nMAC: " + Constants.Device.mac;
+				
+				mInfoText = createTF(3, 3, Constants.Device.screenWidth, Constants.Device.screenHeight, deviceInfo, 0xffffff, 20);			
+				mMainMenu.addChild(mInfoText);
+			} else {
+				Starling.current.showStats = true;
+			}
         }
 		
 		private function createButton(title:String, callback:String, x:Number, y:Number, texture:String, blendMode:String = BlendMode.NORMAL):Button
@@ -174,6 +176,7 @@ package
 			Starling.current.start();
 			
 			mMainMenu.visible = true;
+			Starling.current.showStats = false;
 		}
 		
 		private function showScene(name:String, options:Object):void
@@ -183,6 +186,7 @@ package
 			var sceneClass:Class = getDefinitionByName(name) as Class;
 			mCurrentScene = new sceneClass(options) as Scene;
 			mMainMenu.visible = false;
+			Starling.current.showStats = true;
 			addChild(mCurrentScene);
 		}
 		
@@ -242,7 +246,7 @@ package
 			showScene(getQualifiedClassName(ClassicBenchmarkScene), options);
 		}
 		
-		// Classic Benchmark
+		// Stress Benchmark
 		
 		private function stressBenchmark1(event:Event):void {
 			var options:Object = {

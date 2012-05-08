@@ -193,6 +193,7 @@ package scenes
             mResultText.fontSize = 30;
             mResultText.x = (mScreenWidth - mResultText.width) >> 1;
             mResultText.y = (mScreenHeight - mResultText.height) >> 1;
+			mResultText.touchable = false;
             
             addChild(mResultText);
             

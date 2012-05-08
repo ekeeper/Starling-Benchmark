@@ -25,7 +25,15 @@ if ($d) {
 
 if ($q) {
     $data = array();
-    @list($data["benchmarkName"], $data["type"], $data["fps"], $root) = explode('_', $q);
+    @list($data["benchmarkName"], $data["type"], $count, $root) = explode('_', $q);
+    
+    if ($data["benchmarkName"] == "Classic") {
+        $aroot = "fps";
+    } else {
+        $aroot = "objects";
+    }
+    
+    $data[$aroot] = $count;
     
     $fieldsKeys = array_keys($data);
     $fieldsValues = array();
@@ -34,11 +42,11 @@ if ($q) {
     }
     $fieldsValues = join(" AND ", $fieldsValues);
     
-    $sql = "SELECT AVG( `objects` ) AS `objects`, AVG( `time` ) AS `time`, `statistics`.`screenWidth`, `statistics`.`screenHeight`, `fps`, `starlingVersion` \n"
+    $sql = "SELECT AVG( `{$root}` ) AS `{$root}`, `statistics`.`screenWidth`, `statistics`.`screenHeight`, `{$aroot}`, `starlingVersion` \n"
         . "`type`\n"
         . "FROM `statistics`, `devices`, `users` \n"
         . "WHERE {$fieldsValues} AND `devices`.`id` = `users`.`device_id` AND `users`.`id` = `statistics`.`user_id` AND `devices`.`os` <> 'iOS' \n"
-        . "GROUP BY `statistics`.`screenWidth`, `statistics`.`screenHeight`, `fps`, `type`, `benchmarkName`, `benchmarkVersion`, `starlingVersion` \n"
+        . "GROUP BY `statistics`.`screenWidth`, `statistics`.`screenHeight`, `{$aroot}`, `type`, `benchmarkName`, `benchmarkVersion` \n" //, `starlingVersion`
         . "ORDER BY `statistics`.`screenWidth`, `statistics`.`screenHeight`;";
 
     $columnName = "Average {$root}";
@@ -48,7 +56,7 @@ if ($q) {
     }
     
     $base = "Resolutions";
-    $title = "{$data["benchmarkName"]}: {$data["type"]}, fps{$data["fps"]}, {$root}";
+    $title = "{$data["benchmarkName"]}: {$data["type"]}, {$data[$aroot]} {$aroot}, {$root}";
 
     $result = $db->query($sql);
 
@@ -152,11 +160,20 @@ if ($q) {
         <div class="span3" style="width:250px">
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
-              <li class="nav-header">Reports</li>
-              <li><a href="/starling/benchmark?q=Classic_Images_30_objects">Classic: Images, 30fps, objects</a></li>
-              <li><a href="/starling/benchmark?q=Classic_Images_60_objects">Classic: Images, 60fps, objects</a></li>
-              <li><a href="/starling/benchmark?q=Classic_MovieClips_30_objects">Classic: MovieClips, 30fps, objects</a></li>
-              <li><a href="/starling/benchmark?q=Classic_MovieClips_60_objects">Classic: MovieClips, 60fps, objects</a></li>
+              <li class="nav-header">Classic Benchmark Reports</li>
+              <li><a href="/starling/benchmark?q=Classic_Images_30_objects">Images, 30fps, objects</a></li>
+              <li><a href="/starling/benchmark?q=Classic_Images_60_objects">Images, 60fps, objects</a></li>
+              <li><a href="/starling/benchmark?q=Classic_MovieClips_30_objects">MovieClips, 30fps, objects</a></li>
+              <li><a href="/starling/benchmark?q=Classic_MovieClips_60_objects">MovieClips, 60fps, objects</a></li>
+              <li class="nav-header">Stress Benchmark Reports</li>
+              <li><a href="/starling/benchmark?q=Stress_Images_100_fps">Images, 100 objects, fps</a></li>
+              <li><a href="/starling/benchmark?q=Stress_Images_500_fps">Images, 500 objects, fps</a></li>
+              <li><a href="/starling/benchmark?q=Stress_Images_1000_fps">Images, 1000 objects, fps</a></li>
+              <li><a href="/starling/benchmark?q=Stress_Images_2000_fps">Images, 2000 objects, fps</a></li>
+              <li><a href="/starling/benchmark?q=Stress_MovieClips_100_fps">MovieClips, 100 objects, fps</a></li>
+              <li><a href="/starling/benchmark?q=Stress_MovieClips_500_fps">MovieClips, 500 objects, fps</a></li>
+              <li><a href="/starling/benchmark?q=Stress_MovieClips_1000_fps">MovieClips, 1000 objects, fps</a></li>
+              <li><a href="/starling/benchmark?q=Stress_MovieClips_2000_fps">MovieClips, 2000 objects, fps</a></li>
               <li class="nav-header">Devices</li>
               <li><a href="/starling/benchmark?d=all">All benchmarked devices</a></li>
             </ul>

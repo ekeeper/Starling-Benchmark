@@ -108,8 +108,8 @@ if ($data) {
                 
                 $user["device_id"] = $deviceId;
                 
-                if (trim($device['mac']) == "") {
-                    $sql ="SELECT id FROM `users` WHERE `ip` = '{$device['ip']}' AND device_id = {$deviceId} LIMIT 1";
+                if (trim($user['mac']) == "") {
+                    $sql ="SELECT id FROM `users` WHERE `ip` = '{$user["ip"]}' AND device_id = {$deviceId} LIMIT 1";
                     $result = $db->query($sql);
                     $num_rows = ($result) ? mysql_num_rows($result) : 0;
                 
@@ -121,7 +121,7 @@ if ($data) {
                     }
                 }
                 
-                if ($userId < 0 || trim($device['mac']) != "") {
+                if ($userId < 0 || trim($user['mac']) != "") {
                     $keys = join("`, `", array_keys($user));
                     $values = join("', '", array_values($user));
                     $sql = "INSERT INTO `users` (`id`, `{$keys}`) VALUES (NULL, '{$values}');";
