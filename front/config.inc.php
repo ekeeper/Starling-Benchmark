@@ -24,5 +24,5 @@ require_once('ip.inc.php');
 $db = new CDatabase($config->dbname, $config->dbhost, $config->dbuser, $config->dbpass);
 //mysql_query("SET NAMES 'UTF8'");
 
-//session_start();
+session_start();
 ?>
