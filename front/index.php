@@ -86,11 +86,18 @@ if ($q) {
     }
     $fieldsValues = join(" AND ", $fieldsValues);
     
-    $sql = "SELECT AVG( `{$root}` ) AS `{$root}`, `statistics`.`screenWidth`, `statistics`.`screenHeight`, `type`, `{$aroot}` \n"
+    
+    if ($ios) {
+        $filter = "`devices`.`manufacturer`, `devices`.`model`";
+    } else {
+        $filter = "`statistics`.`screenWidth`, `statistics`.`screenHeight`";
+    }
+    
+    $sql = "SELECT AVG( `{$root}` ) AS `{$root}`, {$filter}, `type`, `{$aroot}` \n"
         . "FROM `statistics`, `devices`, `users` \n"
         . "WHERE {$fieldsValues} AND `devices`.`id` = `users`.`device_id` AND `users`.`id` = `statistics`.`user_id` AND `devices`.`os` ".($ios?"=":"<>")." 'iOS' \n"
-        . "GROUP BY `statistics`.`screenWidth`, `statistics`.`screenHeight`, `{$aroot}`, `type`, `benchmarkName`, `benchmarkVersion` \n" //, `starlingVersion`
-        . "ORDER BY `statistics`.`screenWidth`, `statistics`.`screenHeight`;";
+        . "GROUP BY {$filter}, `{$aroot}`, `type`, `benchmarkName`, `benchmarkVersion` \n" //, `starlingVersion`
+        . "ORDER BY {$filter};";
 
     $columnName = ucfirst($root);
     
@@ -110,15 +117,21 @@ if ($q) {
         
         while ($row = mysql_fetch_assoc($result)) {
             $rootData = ($root == "time") ? round($row['time']/1000,2) : $row[$root];
+            
+            if ($ios) {
+                $rkey = STR_FROM_DB($row['model']);
+            } else {
+                $rkey = STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight']);
+            }
+            
             if ($a) $sum += $rootData;
             if ($c) {
-                $rows[STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight'])][$row[$aroot]] = STR_FROM_DB($rootData);
+                $rows[$rkey][$row[$aroot]] = STR_FROM_DB($rootData);
                 if (!in_array($row[$aroot], $keys)) {
                     $keys[] = $row[$aroot];
                 }
             } else {
-                $rows[] = "['".
-                    STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight'])."', ".
+                $rows[] = "['{$rkey}', ".
                     STR_FROM_DB($rootData).($a?"":"]");
             }
         }

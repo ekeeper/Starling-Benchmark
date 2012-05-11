@@ -96,8 +96,6 @@ package scenes
 		{
 			super.startBenchmark();
 			
-			System.gc();
-			
 			mStartButton.visible = false;
 			mStarted = true;
 			mFrameCount = 0;
