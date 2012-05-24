@@ -158,7 +158,7 @@ package starling.display
 
             if (mVertexBuffer)    mVertexBuffer.dispose();
             if (mIndexBuffer)     mIndexBuffer.dispose();
-            if (mNumQuads == 0)   return;
+            if (numVertices == 0) return;
             if (context == null)  throw new MissingContextError();
             
             mVertexBuffer = context.createVertexBuffer(numVertices, VertexData.ELEMENTS_PER_VERTEX);
@@ -477,6 +477,9 @@ package starling.display
         // properties
         
         public function get numQuads():int { return mNumQuads; }
+        public function get tinted():Boolean { return mTinted; }
+        public function get texture():Texture { return mTexture; }
+        public function get smoothing():String { return mSmoothing; }
         
         private function get capacity():int { return mVertexData.numVertices / 4; }
         
@@ -576,16 +579,79 @@ package starling.display
                                                     mipMap:Boolean=true, repeat:Boolean=false,
                                                     smoothing:String="bilinear"):String
         {
-            // this method is designed to return most quickly when called with
-            // the default parameters (no-repeat, mipmap, bilinear)
+            // to avoid temporary string creation, the program name is not built dynamically;
+            // instead, we use a generated code that returns a string constant.
+            // code generator: https://gist.github.com/2774587
             
-            var name:String = tinted ? "QB_i*" : "QB_i'";
+            if (tinted)
+            {
+                if (mipMap)
+                {
+                    if (repeat)
+                    {
+                        if (smoothing == 'bilinear') return "QB_i*MRB";
+                        else if (smoothing == 'trilinear') return "QB_i*MRT";
+                        else return "QB_i*MRN";
+                    }
+                    else
+                    {
+                        if (smoothing == 'bilinear') return "QB_i*MB";
+                        else if (smoothing == 'trilinear') return "QB_i*MT";
+                        else return "QB_i*MN";
+                    }
+                }
+                else
+                {
+                    if (repeat)
+                    {
+                        if (smoothing == 'bilinear') return "QB_i*RB";
+                        else if (smoothing == 'trilinear') return "QB_i*RT";
+                        else return "QB_i*RN";
+                    }
+                    else
+                    {
+                        if (smoothing == 'bilinear') return "QB_i*B";
+                        else if (smoothing == 'trilinear') return "QB_i*T";
+                        else return "QB_i*N";
+                    }
+                }
+            }
+            else
+            {
+                if (mipMap)
+                {
+                    if (repeat)
+                    {
+                        if (smoothing == 'bilinear') return "QB_i'MRB";
+                        else if (smoothing == 'trilinear') return "QB_i'MRT";
+                        else return "QB_i'MRN";
+                    }
+                    else
+                    {
+                        if (smoothing == 'bilinear') return "QB_i'MB";
+                        else if (smoothing == 'trilinear') return "QB_i'MT";
+                        else return "QB_i'MN";
+                    }
+                }
+                else
+                {
+                    if (repeat)
+                    {
+                        if (smoothing == 'bilinear') return "QB_i'RB";
+                        else if (smoothing == 'trilinear') return "QB_i'RT";
+                        else return "QB_i'RN";
+                    }
+                    else
+                    {
+                        if (smoothing == 'bilinear') return "QB_i'B";
+                        else if (smoothing == 'trilinear') return "QB_i'T";
+                        else return "QB_i'N";
+                    }
+                }
+            }
             
-            if (!mipMap) name += "N";
-            if (repeat)  name += "R";
-            if (smoothing != TextureSmoothing.BILINEAR) name += smoothing.charAt(0);
-            
-            return name;
+            // end of generated code
         }
+        
     }
 }

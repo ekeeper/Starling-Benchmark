@@ -82,7 +82,7 @@ package starling.display
          *  either call <code>flatten</code> again, or <code>unflatten</code> the sprite. */
         public function flatten():void
         {
-            dispatchEventOnChildren(new Event(Event.FLATTEN));
+            broadcastEventWith(Event.FLATTEN);
             
             if (mFlattenedContents == null)
             {
@@ -136,7 +136,7 @@ package starling.display
                 {
                     var quadBatch:QuadBatch = mFlattenedContents[i];
                     var blendMode:String = quadBatch.blendMode == BlendMode.AUTO ?
-                                           support.blendMode : quadBatch.blendMode;
+                        support.blendMode : quadBatch.blendMode;
                     quadBatch.renderCustom(mvpMatrix, alpha, blendMode);
                 }
             }

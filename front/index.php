@@ -1,9 +1,14 @@
 <?
 require_once 'config.inc.php';
 
+$quantiles = array("objects" => 5, "fps" => 5, "resolutions" => 5, "manufacturer" => 4);
+
 $q = @$_REQUEST['q'];
 $d = @$_REQUEST['d'];
 $c = @$_REQUEST['c'];
+$s = @$_REQUEST['s'];
+$f = @$_REQUEST['f'];
+$f = true;
 $a = !$c;
 
 $os = @SHOW($_REQUEST['os'], SHOW($_SESSION['os'], "Android"));
@@ -11,19 +16,111 @@ $ios = ($os == "iOS");
 $_SESSION['ios'] = $ios;
 $_SESSION['os'] = $os;
 
+$f = $ios ? false : $f;
+
+if ($s) {
+    $sql = "SELECT `statistics`.`type`, MAX( `statistics`.`objects` ) AS `objects`\n"
+    . "FROM `statistics`, `devices` , `users` \n"
+    . "WHERE `users`.`device_id` = `devices`.`id` AND `users`.`id` = `statistics`.`user_id` AND `os` <> 'iOS' "
+    . "AND `statistics`.`benchmarkName` = \"Classic\" AND `statistics`.`fps`=30 GROUP BY `statistics`.`type`;";
+    
+    $result = $db->query($sql);
+
+    $max = array();
+    
+    if ($result && mysql_num_rows($result) > 0) {
+        while($row = mysql_fetch_assoc($result)) {
+            $max[$row['type']] = $row['objects'];
+        }
+    }    
+    
+    $sql = "SELECT `statistics`.`type` , `statistics`.`objects`\n"
+    . "FROM `statistics`, `devices` , `users` \n"
+    . "WHERE `users`.`device_id` = `devices`.`id` AND `users`.`id` = `statistics`.`user_id` AND `os` <> 'iOS' "
+    . "AND `statistics`.`benchmarkName` = \"Classic\" AND `statistics`.`fps`=30 \n"
+    . "GROUP BY `statistics`.`id` ORDER BY `statistics`.`type`, `statistics`.`objects`";
+    
+    $result = $db->query($sql);
+
+    $rows = array();
+    $arows = array();
+    
+    if ($result && mysql_num_rows($result) > 0) {
+        while($row = mysql_fetch_assoc($result)) {
+            if ((int)$row['objects'] > $max[$row['type']]*$quantiles["objects"]/100) {
+                $arows[$row['type']][] = $row['objects'];
+            }
+        }
+    }
+    
+    $minKey = -1; $min = 0; $max = 0; $t = 0;
+    $a = array();
+    $keys = array();
+    foreach ($arows as $key => $value) {
+        $t = count($value);
+        if (!$min || $t < $min) { $min = $t; $minKey = $key; }
+        if (!$max || $t > $max) $max = $t;
+        sort($arows[$key]);
+        $a[] = "'{$key}'";
+        $keys[] = $key;
+    }
+    $rows[] .= "['', ".join(", ", $a)."]";
+
+    $deltha = ceil($min / ($max - $min))-1;
+    $j = 1; $tarray = array();
+    
+    for ($i = 0; $i < $min; $i++) {
+        $tarray[] = $arows[$minKey][$i];
+        if ($i == $deltha*$j) {
+            $j++;
+            $tarray[] = $arows[$minKey][$i];
+            $min++;
+        }
+    }
+    
+    while ($min++ < $max) {
+       $tarray[] = $arows[$minKey][$max-1]; 
+    }
+    
+    $arows[$minKey] = $tarray;
+    
+    for ($i = 0; $i < $max; $i++) {
+        $rows[] = "['{$i}', {$arows[$keys[0]][$i]}, {$arows[$keys[1]][$i]}]";
+    }
+    
+    $rows = join(", \n", $rows);
+    
+    $title = "Classic benchmark, 30fps";
+}
+
 if ($d) {
     if ($d != "all") {
+        $f = true;
+        
+        $sql = "SELECT COUNT( `users`.`device_id` ) AS `cnt`\n"
+        . "FROM `users` \n"
+        . "WHERE 1 ORDER BY `cnt` DESC LIMIT 1;";
+        
+        $result = $db->query($sql);
+
+        if ($result && mysql_num_rows($result) > 0) {
+            $row = mysql_fetch_assoc($result);
+            $max = $row['cnt'];
+        }
+        
         $sql = "SELECT COUNT( `users`.`device_id` ) AS `cnt` , `screenWidth` , `screenHeight`, `manufacturer`\n"
         . "FROM `devices` , `users` \n"
         . "WHERE `users`.`device_id` = `devices`.`id` \n"
-        . "AND `os` ".($ios?"=":"<>")." 'iOS'\n";
+        . "AND `os` ".($ios?"=":"<>")." 'iOS' \n";
         
         if ($d == "resolutions") {
+//            $sql .= "GROUP BY `screenWidth` , `screenHeight` ".($f?"HAVING `cnt`*100/{$max} > {$quantiles[$d]}":"")."\n"
             $sql .= "GROUP BY `screenWidth` , `screenHeight` \n"
-                 .  "ORDER BY `screenWidth`";        
+                 .  "ORDER BY `screenWidth`;";        
         } else {
+//            $sql .= "GROUP BY `manufacturer` ".($f?"HAVING (`cnt`*100/{$max}) > {$quantiles[$d]}":"")."\n"
             $sql .= "GROUP BY `manufacturer` \n"
-                 .  "ORDER BY `manufacturer`";        
+                 .  "ORDER BY `manufacturer`;";        
         }
         
         $columnName = "Count";
@@ -35,20 +132,28 @@ if ($d) {
 
         if ($result && mysql_num_rows($result) > 0) {
             $rows = array();
+            $others = 0;
+            
             while ($row = mysql_fetch_assoc($result)) {
-                $key = STR_FROM_DB(($d == "resolutions") ? $row['screenWidth']."x".$row['screenHeight'] : $row['manufacturer']);
-
-                $rows[] = "['".
-                    STR_FROM_DB($key)."', ".
-                    STR_FROM_DB($row['cnt'])."]";
+                if ($f && $row['cnt']*100/$max > $quantiles[$d]) {
+                    $key = STR_FROM_DB(($d == "resolutions") ? $row['screenWidth']."x".$row['screenHeight'] : $row['manufacturer']);
+                    $rows[] = "['".
+                        STR_FROM_DB($key)."', ".
+                        STR_FROM_DB($row['cnt'])."]";
+                } else {
+                    $key = "Other";
+                    $others += $row['cnt'];
+                }
             }
+            
+            if ($others) $rows[] = "['Other', {$others}]";
 
             $rows = join(", ", $rows);
         } else {
             $d = null;
         }
     } else {
-        $sql = "SELECT count(`users`.`device_id`) as `cnt`, `manufacturer` , `model` , `screenWidth` , `screenHeight`, `cpuHz`, `ram` \n"
+        $sql = "SELECT COUNT(`users`.`device_id`) as `cnt`, `manufacturer` , `model` , `screenWidth` , `screenHeight`, `cpuHz`, `ram` \n"
         . "FROM `devices`, `users` \n"
         . "WHERE `users`.`device_id` = `devices`.`id` AND `os` ".($ios?"=":"<>")." 'iOS' \n"
         . "GROUP BY `manufacturer` , `model`, `screenWidth` , `screenHeight` \n"
@@ -70,6 +175,35 @@ if ($d) {
 if ($q) {
     $data = array();
     @list($data["benchmarkName"], $data["type"], $count, $root) = explode('_', $q);
+    
+    if ($f) {
+        $sql = "SELECT COUNT( `users`.`device_id` ) AS `cnt`\n"
+        . "FROM `users` \n"
+        . "WHERE 1 ORDER BY `cnt` DESC LIMIT 1;";
+        
+        $result = $db->query($sql);
+
+        if ($result && mysql_num_rows($result) > 0) {
+            $row = mysql_fetch_assoc($result);
+            $max = $row['cnt'];
+        }
+        
+        $sql = "SELECT COUNT( `users`.`device_id` ) AS `cnt` , `screenWidth` , `screenHeight`\n"
+        . "FROM `devices` , `users` \n"
+        . "WHERE `users`.`device_id` = `devices`.`id` \n"
+        . "AND `os` ".($ios?"=":"<>")." 'iOS' \n"
+        . "GROUP BY `screenWidth` , `screenHeight` ".($f?"HAVING `cnt`*100/{$max} > {$quantiles[$root]}":"")."\n"
+        .  "ORDER BY `screenWidth`;";        
+        
+        $result = $db->query($sql);
+
+        if ($result && mysql_num_rows($result) > 0) {
+            $resolutions = array();
+            while ($row = mysql_fetch_assoc($result)) {
+                $resolutions[] = STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight']);
+            }
+        }
+    }
     
     if ($data["benchmarkName"] == "Classic") {
         $aroot = "fps";
@@ -114,16 +248,27 @@ if ($q) {
         $rows = array();
         if ($c) $keys = array();
         if ($a) $sum = 0;
+        $others = array();
+        $others_keys = array();
         
         while ($row = mysql_fetch_assoc($result)) {
             $rootData = ($root == "time") ? round($row['time']/1000,2) : $row[$root];
-            
+
             if ($ios) {
                 $rkey = STR_FROM_DB($row['model']);
             } else {
                 $rkey = STR_FROM_DB($row['screenWidth'])."x".STR_FROM_DB($row['screenHeight']);
+                if ($f && !in_array($rkey, $resolutions)) {
+                    if (!$others[$row[$aroot]]) {
+                        $others[$row[$aroot]] = 0;
+                        $others_keys[$row[$aroot]] = 0;
+                    }
+                    $others[$row[$aroot]] += $rootData;
+                    $others_keys[$row[$aroot]]++;
+                    continue;
+                }
             }
-            
+                    
             if ($a) $sum += $rootData;
             if ($c) {
                 $rows[$rkey][$row[$aroot]] = STR_FROM_DB($rootData);
@@ -133,6 +278,12 @@ if ($q) {
             } else {
                 $rows[] = "['{$rkey}', ".
                     STR_FROM_DB($rootData).($a?"":"]");
+            }
+        }
+        
+        if ($c && count($others)) {
+            foreach ($others as $_k => $_v) {
+                $rows["Other"][$_k] = $_v/$others_keys[$_k];
             }
         }
 
@@ -221,13 +372,26 @@ if ($q) {
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png"> -->
 
-    <? if ($q || ($d && $d != "all")) { ?>
+    <? if ($s || $q || ($d && $d != "all")) { ?>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
       function drawChart() {
-    <? if ($d && $d != "all") { ?>
+    <? if ($s) { ?>
+        var data = google.visualization.arrayToDataTable([
+          <?=$rows?>
+        ]);
+
+        var options = {
+          title: '<?=$title?>',
+          vAxis: {title: "Objects", gridlines: {count: 8}},
+          hAxis: {gridlines: {count: 3}, textPosition:'none'},
+          fontSize: 20
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    <? } else if ($d && $d != "all") { ?>
         var data = new google.visualization.DataTable();
         data.addColumn('string', '<?=$base?>');
         data.addColumn('number', '<?=$columnName?>');
@@ -236,7 +400,8 @@ if ($q) {
         ]);
 
         var options = {
-          title: '<?=$title?>'
+          title: '<?=$title?>',
+          fontSize: 20
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
@@ -245,10 +410,20 @@ if ($q) {
             <?=$rows?>
         ]);
 
+<?
+    $value = "";
+    if ($root=="fps") {
+        $value = ", minValue: 0, maxValue: 50";
+    } else if ($root=="objects" && $ios) {
+        $value = ", minValue: 0, maxValue: 1100";
+    }
+?>
         var options = {
+          height: 600,
           title : '<?=$title?>',
-          vAxis: {title: "<?=ucfirst($root)?>"},
+          vAxis: {title: "<?=ucfirst($root)?>"<?=$value?>},
           hAxis: {title: "<?=$base?>"},
+          fontSize: 20,
           seriesType: "bars",
           <? if ($a) { ?>series: {<?=$q?>: {type: "line"}}<? } ?>
         };
@@ -311,7 +486,10 @@ if ($q) {
               <li class="nav-header">Devices</li>
               <li><a href="/starling/benchmark?d=all">All benchmarked devices</a></li>
               <li><a href="/starling/benchmark?d=resolutions">Resolutions chart</a></li>
+              <? if (!$ios) { ?>
               <li><a href="/starling/benchmark?d=manufacturer">Manufacturers chart</a></li>
+              <li><a href="/starling/benchmark?s=true">Composite chart</a></li>
+              <? } ?>
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
@@ -356,8 +534,10 @@ if ($q) {
                 <td><?=$total?></td>
             </tr>
         </table>
-          <? } else if ($q || ($d && $d != "all")) { ?>
-          <div id="chart_div" style="width: 100%; height: 500px;"></div>
+          <? } else if ($s || $q || ($d && $d != "all")) { $height = $s ? 800: 600;?>
+          <div align="center">
+            <div id="chart_div" style="width: 100%; height: <?=$height?>px;"></div>
+          </div>
           <? } else { ?>
           <div class="hero-unit">
             <h1>Starling Benchmark</h1>

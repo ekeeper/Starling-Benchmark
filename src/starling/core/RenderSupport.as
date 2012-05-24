@@ -25,7 +25,7 @@ package starling.core
      */
     public class RenderSupport
     {
-        // members        
+        // members
         
         private var mProjectionMatrix:Matrix3D;
         private var mModelViewMatrix:Matrix3D;
