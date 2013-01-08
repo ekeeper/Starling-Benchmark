@@ -14,7 +14,6 @@ package starling.textures
     import flash.display3D.Context3D;
     import flash.display3D.Context3DTextureFormat;
     import flash.display3D.textures.TextureBase;
-    import flash.utils.ByteArray;
     
     import starling.core.Starling;
     import starling.events.Event;
@@ -23,6 +22,7 @@ package starling.textures
     public class ConcreteTexture extends Texture
     {
         private var mBase:TextureBase;
+        private var mFormat:String;
         private var mWidth:int;
         private var mHeight:int;
         private var mMipMapping:Boolean;
@@ -33,13 +33,14 @@ package starling.textures
         
         /** Creates a ConcreteTexture object from a TextureBase, storing information about size,
          *  mip-mapping, and if the channels contain premultiplied alpha values. */
-        public function ConcreteTexture(base:TextureBase, width:int, height:int, 
+        public function ConcreteTexture(base:TextureBase, format:String, width:int, height:int, 
                                         mipMapping:Boolean, premultipliedAlpha:Boolean,
                                         optimizedForRenderTexture:Boolean=false,
                                         scale:Number=1)
         {
             mScale = scale <= 0 ? 1.0 : scale;
             mBase = base;
+            mFormat = format;
             mWidth = width;
             mHeight = height;
             mMipMapping = mipMapping;
@@ -63,7 +64,7 @@ package starling.textures
         {
             if (mData == null && data != null)
                 Starling.current.addEventListener(Event.CONTEXT3D_CREATE, onContextCreated);
-            if (data == null)
+            else if (data == null)
                 Starling.current.removeEventListener(Event.CONTEXT3D_CREATE, onContextCreated);
             
             mData = data;
@@ -73,7 +74,7 @@ package starling.textures
         {
             var context:Context3D = Starling.context;
             var bitmapData:BitmapData = mData as BitmapData;
-            var byteData:ByteArray = mData as ByteArray;
+            var atfData:AtfData = mData as AtfData;
             var nativeTexture:flash.display3D.textures.Texture;
             
             if (bitmapData)
@@ -82,16 +83,13 @@ package starling.textures
                     Context3DTextureFormat.BGRA, mOptimizedForRenderTexture);
                 Texture.uploadBitmapData(nativeTexture, bitmapData, mMipMapping);
             }
-            else if (byteData)
+            else if (atfData)
             {
-                var format:String = byteData[6] == 2 ? Context3DTextureFormat.COMPRESSED :
-                    Context3DTextureFormat.BGRA;
-                
-                nativeTexture = context.createTexture(mWidth, mHeight, 
-                    format, mOptimizedForRenderTexture);
-                Texture.uploadAtfData(nativeTexture, byteData);
+                nativeTexture = context.createTexture(atfData.width, atfData.height, atfData.format,
+                                                      mOptimizedForRenderTexture);
+                Texture.uploadAtfData(nativeTexture, atfData.data);
             }
-                
+            
             mBase = nativeTexture;
         }
         
@@ -104,10 +102,22 @@ package starling.textures
         public override function get base():TextureBase { return mBase; }
         
         /** @inheritDoc */
+        public override function get root():ConcreteTexture { return this; }
+        
+        /** @inheritDoc */
+        public override function get format():String { return mFormat; }
+        
+        /** @inheritDoc */
         public override function get width():Number  { return mWidth / mScale;  }
         
         /** @inheritDoc */
         public override function get height():Number { return mHeight / mScale; }
+        
+        /** @inheritDoc */
+        public override function get nativeWidth():Number { return mWidth; }
+        
+        /** @inheritDoc */
+        public override function get nativeHeight():Number { return mHeight; }
         
         /** The scale factor, which influences width and height properties. */
         public override function get scale():Number { return mScale; }

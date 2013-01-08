@@ -224,6 +224,22 @@ package starling.display
             }
         }
         
+        /** The vertical alignment of the text on the button. */
+        public function get textVAlign():String { return mTextField.vAlign; }
+        public function set textVAlign(value:String):void
+        {
+            createTextField();
+            mTextField.vAlign = value;
+        }
+        
+        /** The horizontal alignment of the text on the button. */
+        public function get textHAlign():String { return mTextField.hAlign; }
+        public function set textHAlign(value:String):void
+        {
+            createTextField();
+            mTextField.hAlign = value;
+        }
+        
         /** The bounds of the textfield on the button. Allows moving the text to a custom position. */
         public function get textBounds():Rectangle { return mTextBounds.clone(); }
         public function set textBounds(value:Rectangle):void
@@ -234,7 +250,7 @@ package starling.display
         
         /** Indicates if the mouse cursor should transform into a hand while it's over the button. 
          *  @default true */
-        public function get useHandCursor():Boolean { return mUseHandCursor; }
-        public function set useHandCursor(value:Boolean):void { mUseHandCursor = value; }
+        public override function get useHandCursor():Boolean { return mUseHandCursor; }
+        public override function set useHandCursor(value:Boolean):void { mUseHandCursor = value; }
     }
 }

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<application xmlns="http://ns.adobe.com/air/application/3.2">
+<application xmlns="http://ns.adobe.com/air/application/3.5">
 
 <!-- Adobe AIR Application Descriptor File Template.
 
 	Specifies parameters for identifying, installing, and launching AIR applications.
 
 	xmlns - The Adobe AIR namespace: http://ns.adobe.com/air/application/3.2
-			The last segment of the namespace specifies the version 
+			The last segment of the namespace specifies the version
 			of the AIR runtime required for this application to run.
-			
-	minimumPatchLevel - The minimum patch level of the AIR runtime required to run 
+
+	minimumPatchLevel - The minimum patch level of the AIR runtime required to run
 			the application. Optional.
 -->
 
@@ -20,15 +20,15 @@
 	<!-- Used as the filename for the application. Required. -->
 	<filename>Starling-Benchmark</filename>
 
-	<!-- The name that is displayed in the AIR application installer. 
+	<!-- The name that is displayed in the AIR application installer.
 	May have multiple values for each language. See samples or xsd schema file. Optional. -->
 	<name>Starling Benchmark</name>
-	
-	<!-- A string value of the format <0-999>.<0-999>.<0-999> that represents application version which can be used to check for application upgrade. 
+
+	<!-- A string value of the format <0-999>.<0-999>.<0-999> that represents application version which can be used to check for application upgrade.
 	Values can also be 1-part or 2-part. It is not necessary to have a 3-part value.
 	An updated version of application must have a versionNumber value higher than the previous version. Required for namespace >= 2.5 . -->
-	<versionNumber>0.4.8</versionNumber>
-		         
+	<versionNumber>0.5</versionNumber>
+
 	<!-- A string value (such as "v1", "2.5", or "Alpha 1") that represents the version of the application, as it should be shown to users. Optional. -->
 	<!-- <versionLabel></versionLabel> -->
 
@@ -47,7 +47,7 @@
 		<!-- The main SWF or HTML file of the application. Required. -->
 		<!-- Note: In Flash Builder, the SWF reference is set automatically. -->
 		<content>[Это значение будет перезаписано программой Flash Builder в выходном файле app.xml]</content>
-		
+
 		<!-- The title of the main window. Optional. -->
 		<!-- <title></title> -->
 
@@ -112,7 +112,7 @@
 	<autoOrients>false</autoOrients>
         <fullScreen>true</fullScreen>
         <visible>true</visible>
-		<softKeyboardBehavior>none</softKeyboardBehavior>        
+		<softKeyboardBehavior>none</softKeyboardBehavior>
     </initialWindow>
 
 	<!-- We recommend omitting the supportedProfiles element, -->
@@ -150,7 +150,7 @@
 	of the AIR file (true), or the default AIR application installer handles the update (false).
 	Optional. Default false. -->
 	<!-- <customUpdateUI></customUpdateUI> -->
-	
+
 	<!-- Whether the application can be launched when the user clicks a link in a web browser.
 	Optional. Default false. -->
 	<!-- <allowBrowserInvocation></allowBrowserInvocation> -->
@@ -166,13 +166,13 @@
 
 			<!-- The extension to register. Required. -->
 			<!-- <extension></extension> -->
-			
+
 			<!-- The description of the file type. Optional. -->
 			<!-- <description></description> -->
-			
+
 			<!-- The MIME content type. -->
 			<!-- <contentType></contentType> -->
-			
+
 			<!-- The icon to display for the file type. Optional. -->
 			<!-- <icon>
 				<image16x16></image16x16>
@@ -180,7 +180,7 @@
 				<image48x48></image48x48>
 				<image128x128></image128x128>
 			</icon> -->
-			
+
 		<!-- </fileType> -->
 	<!-- </fileTypes> -->
 
@@ -238,7 +238,7 @@
         <!-- <colorDepth></colorDepth> -->
     <!-- </android> -->
 	<!-- End of the schema for adding the android specific tags in AndroidManifest.xml file -->
-	
+
 <android>
         <manifestAdditions><![CDATA[
 			<manifest android:installLocation="auto">
@@ -260,7 +260,7 @@
 			    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 			    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 			</manifest>
-			
+
 		]]></manifestAdditions>
 		<colorDepth>16bit</colorDepth>
     </android>

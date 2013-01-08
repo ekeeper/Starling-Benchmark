@@ -104,10 +104,22 @@ package starling.textures
         public override function get base():TextureBase { return mParent.base; }
         
         /** @inheritDoc */
+        public override function get root():ConcreteTexture { return mParent.root; }
+        
+        /** @inheritDoc */
+        public override function get format():String { return mParent.format; }
+        
+        /** @inheritDoc */
         public override function get width():Number { return mParent.width * mClipping.width; }
         
         /** @inheritDoc */
         public override function get height():Number { return mParent.height * mClipping.height; }
+        
+        /** @inheritDoc */
+        public override function get nativeWidth():Number { return mParent.nativeWidth * mClipping.width; }
+        
+        /** @inheritDoc */
+        public override function get nativeHeight():Number { return mParent.nativeHeight * mClipping.height; }
         
         /** @inheritDoc */
         public override function get mipMapping():Boolean { return mParent.mipMapping; }

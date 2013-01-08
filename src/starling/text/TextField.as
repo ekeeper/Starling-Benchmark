@@ -63,6 +63,9 @@ package starling.text
      */
     public class TextField extends DisplayObjectContainer
     {
+        // the name container with the registered bitmap fonts
+        private static const BITMAP_FONT_DATA_NAME:String = "starling.TextField.BitmapFonts";
+        
         private var mFontSize:Number;
         private var mColor:uint;
         private var mText:String;
@@ -74,6 +77,7 @@ package starling.text
         private var mUnderline:Boolean;
         private var mAutoScale:Boolean;
         private var mKerning:Boolean;
+        private var mNativeFilters:Array;
         private var mRequiresRedraw:Boolean;
         private var mIsRenderedText:Boolean;
         private var mTextBounds:Rectangle;
@@ -86,9 +90,6 @@ package starling.text
         
         // this object will be used for text rendering
         private static var sNativeTextField:flash.text.TextField = new flash.text.TextField();
-        
-        // this is the container for bitmap fonts
-        private static var sBitmapFonts:Dictionary = new Dictionary();
         
         /** Create a new text field with the given properties. */
         public function TextField(width:int, height:int, text:String, fontName:String="Verdana",
@@ -120,7 +121,7 @@ package starling.text
             super.dispose();
         }
         
-        private function onFlatten(event:Event):void
+        private function onFlatten():void
         {
             if (mRequiresRedraw) redrawContents();
         }
@@ -165,6 +166,7 @@ package starling.text
             sNativeTextField.wordWrap = true;            
             sNativeTextField.text = mText;
             sNativeTextField.embedFonts = true;
+            sNativeTextField.filters = mNativeFilters;
             
             // we try embedded fonts first, non-embedded fonts are just a fallback
             if (sNativeTextField.textWidth == 0.0 || sNativeTextField.textHeight == 0.0)
@@ -188,13 +190,14 @@ package starling.text
             
             var bitmapData:BitmapData = new BitmapData(width, height, true, 0x0);
             bitmapData.draw(sNativeTextField, new Matrix(1, 0, 0, 1, 0, int(yOffset)-2));
+            sNativeTextField.text = "";
             
             // update textBounds rectangle
             if (mTextBounds == null) mTextBounds = new Rectangle();
             mTextBounds.setTo(xOffset   / scale, yOffset    / scale,
                               textWidth / scale, textHeight / scale);
             
-            var texture:Texture = Texture.fromBitmapData(bitmapData, true, false, scale);
+            var texture:Texture = Texture.fromBitmapData(bitmapData, false, false, scale);
             
             if (mImage == null) 
             {
@@ -243,7 +246,7 @@ package starling.text
             else
                 mQuadBatch.reset();
             
-            var bitmapFont:BitmapFont = sBitmapFonts[mFontName];
+            var bitmapFont:BitmapFont = bitmapFonts[mFontName];
             if (bitmapFont == null) throw new Error("Bitmap font not registered: " + mFontName);
             
             bitmapFont.fillQuadBatch(mQuadBatch,
@@ -326,12 +329,12 @@ package starling.text
         {
             if (mFontName != value)
             {
-                if (value == BitmapFont.MINI && sBitmapFonts[value] == undefined)
+                if (value == BitmapFont.MINI && bitmapFonts[value] == undefined)
                     registerBitmapFont(new BitmapFont());
                 
                 mFontName = value;
                 mRequiresRedraw = true;
-                mIsRenderedText = sBitmapFonts[value] == undefined;
+                mIsRenderedText = bitmapFonts[value] == undefined;
             }
         }
         
@@ -465,28 +468,57 @@ package starling.text
                 mRequiresRedraw = true;
             }
         }
+
+        /** The native Flash BitmapFilters to apply to this TextField. 
+         *  Only available when using standard (TrueType) fonts! */
+        public function get nativeFilters():Array { return mNativeFilters; }
+        public function set nativeFilters(value:Array) : void
+        {
+            if (!mIsRenderedText)
+                throw(new Error("The TextField.nativeFilters property cannot be used on Bitmap fonts."));
+			
+            mNativeFilters = value.concat();
+            mRequiresRedraw = true;
+        }
         
         /** Makes a bitmap font available at any text field, identified by its <code>name</code>.
          *  Per default, the <code>name</code> property of the bitmap font will be used, but you 
-         *  can pass a custom name, as well. */
-        public static function registerBitmapFont(bitmapFont:BitmapFont, name:String=null):void
+         *  can pass a custom name, as well. @returns the name of the font. */
+        public static function registerBitmapFont(bitmapFont:BitmapFont, name:String=null):String
         {
-            sBitmapFonts[name ? name : bitmapFont.name] = bitmapFont;
+            if (name == null) name = bitmapFont.name;
+            bitmapFonts[name] = bitmapFont;
+            return name;
         }
         
         /** Unregisters the bitmap font and, optionally, disposes it. */
         public static function unregisterBitmapFont(name:String, dispose:Boolean=true):void
         {
-            if (dispose && sBitmapFonts[name] != undefined)
-                sBitmapFonts[name].dispose();
+            if (dispose && bitmapFonts[name] != undefined)
+                bitmapFonts[name].dispose();
             
-            delete sBitmapFonts[name];
+            delete bitmapFonts[name];
         }
         
         /** Returns a registered bitmap font (or null, if the font has not been registered). */
         public static function getBitmapFont(name:String):BitmapFont
         {
-            return sBitmapFonts[name];
+            return bitmapFonts[name];
+        }
+        
+        /** Stores the currently available bitmap fonts. Since a bitmap font will only work
+         *  in one Starling instance, they are saved in Starling's 'customData' property. */
+        private static function get bitmapFonts():Dictionary
+        {
+            var fonts:Dictionary = Starling.current.customData[BITMAP_FONT_DATA_NAME] as Dictionary;
+            
+            if (fonts == null)
+            {
+                fonts = new Dictionary();
+                Starling.current.customData[BITMAP_FONT_DATA_NAME] = fonts;
+            }
+            
+            return fonts;
         }
     }
 }
